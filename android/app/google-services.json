@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "659450329715",
+    "firebase_url": "https://mazad-37e39.firebaseio.com",
+    "project_id": "mazad-37e39",
+    "storage_bucket": "mazad-37e39.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659450329715:android:17389f4c01897ebb044806",
+        "android_client_info": {
+          "package_name": "com.skinnyg.mazad"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "659450329715-eq807g9qi52ht2nso7jd2p5din30os6l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAziFThNyrF9XacFHRj1Uo5u4vC5HTYYHE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "659450329715-eq807g9qi52ht2nso7jd2p5din30os6l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
