@@ -45,6 +45,12 @@ class AllAuctions {
         weeksdata.add(new AuctionData.fromJson(v));
       });
     }
+    mobasherdata = mobasherdata.reversed.toList()
+      ..removeWhere((auction) => auction.isFinished);
+    daysdata = daysdata.reversed.toList()
+      ..removeWhere((auction) => auction.isFinished);
+    weeksdata = weeksdata.reversed.toList()
+      ..removeWhere((auction) => auction.isFinished);
   }
 
   Map<String, dynamic> toJson() {
@@ -73,8 +79,11 @@ class AuctionData {
   String lng;
   String address;
   String type;
+  bool isFinished;
   String deletetime;
   String createdAt;
+  String cityName;
+  int cityID;
   String updatedAt;
   List<Images> images;
 
@@ -87,8 +96,11 @@ class AuctionData {
       this.intialPrice,
       this.lat,
       this.lng,
+      this.cityID,
+      this.cityName,
       this.address,
       this.type,
+      this.isFinished,
       this.deletetime,
       this.createdAt,
       this.updatedAt,
@@ -105,6 +117,8 @@ class AuctionData {
     lng = json['lng'].toString();
     address = json['address'].toString();
     type = json['type'].toString();
+    cityName = json['city'];
+    cityID = json['city_id'];
     deletetime = json['deletetime'].toString();
     createdAt = json['created_at'].toString();
     updatedAt = json['updated_at'].toString();
@@ -113,6 +127,25 @@ class AuctionData {
       json['images'].forEach((v) {
         images.add(new Images.fromJson(v));
       });
+    }
+    if (deletetime != null && !deletetime.contains('null')) {
+      // print(createdAt);
+      // Duration dur;
+      // switch (duration) {
+      //   case '1':
+      //     dur = Duration(hours: 12);
+      //     break;
+      //   case '2':
+      //     dur = Duration(hours: 24);
+      //     break;
+      //   case '3':
+      //     dur = Duration(days: 14);
+      //     break;
+      //   default:
+      // }
+      DateTime deleteTime = DateTime.tryParse(deletetime).add(Duration(hours: 3));
+      isFinished = deleteTime.isBefore(DateTime.now());
+      // print('IS FINISHED?     $isFinished');
     }
   }
 
@@ -125,6 +158,7 @@ class AuctionData {
     data['lat'] = this.lat;
     data['lng'] = this.lng;
     data['address'] = this.address;
+    data['city_id'] = this.cityID.toString();
     // data['deletetime'] = this.deletetime;
     // data['id'] = this.id;
     // data['user_id'] = this.userId;
@@ -137,8 +171,6 @@ class AuctionData {
     return data;
   }
 }
-
-
 
 class Images {
   int id;

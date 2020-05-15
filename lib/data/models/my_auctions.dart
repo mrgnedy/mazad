@@ -41,6 +41,9 @@ class MyAuctions {
       });
       finishactions = finishactions.reversed.toList();
     }
+    
+    finishactions.addAll(intialactions.where((auction)=>auction.isFinished));
+    intialactions.removeWhere((auction)=>auction.isFinished);
   }
 
   Map<String, dynamic> toJson() {

@@ -27,11 +27,13 @@ class AllNotifications {
   List<Finished> finished;
   List<Operations> operations;
   List<Commissions> commissions;
+  List<Finishedforuser> finishedforuser;
   List<dynamic> allNotifications;
 
   AllNotifications({
     this.finished,
     this.operations,
+    this.finishedforuser,
     this.commissions,
   });
 
@@ -54,13 +56,19 @@ class AllNotifications {
         commissions.add(new Commissions.fromJson(v));
       });
     }
+    if (json['finishedforuser'] != null) {
+      finishedforuser = new List<Finishedforuser>();
+      json['finishedforuser'].forEach((v) {
+        finishedforuser.add(new Finishedforuser.fromJson(v));
+      });
+    }
     // if (json['times'] != null) {
     //   times = new List<Null>();
     //   json['times'].forEach((v) {
     //     times.add(new Null.fromJson(v));
     //   });
     // }
-    allNotifications = [...finished, ...operations];
+    allNotifications = [...finished, ...operations,...finishedforuser];
     allNotifications.sort((a, b) => DateTime.tryParse(b.createdAt.toString())
         ?.compareTo(DateTime.tryParse(a.createdAt.toString())));
     allNotifications.insertAll(0, commissions);
@@ -91,6 +99,7 @@ class Finished {
   String createdAt;
   String updatedAt;
   User user;
+  AuctionData auction;
 
   Finished(
       {this.id,
@@ -98,7 +107,8 @@ class Finished {
       this.body,
       this.createdAt,
       this.updatedAt,
-      this.user});
+      this.user,
+      this.auction});
 
   Finished.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -107,6 +117,9 @@ class Finished {
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    auction = json['auction'] != null
+        ? new AuctionData.fromJson(json['auction'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -118,6 +131,9 @@ class Finished {
     data['updated_at'] = this.updatedAt;
     if (this.user != null) {
       data['user'] = this.user.toJson();
+    }
+    if (this.auction != null) {
+      data['auction'] = this.auction.toJson();
     }
     return data;
   }
@@ -270,5 +286,52 @@ class Commissions {
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
+  }
+}
+
+class Finishedforuser {
+  int id;
+  String title;
+  String body;
+  String createdAt;
+  String updatedAt;
+  User user;
+  AuctionData auction;
+
+  Finishedforuser(
+      {this.id,
+      this.title,
+      this.body,
+      this.createdAt,
+      this.updatedAt,
+      this.user,
+      this.auction});
+
+  Finishedforuser.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    title = json['title'];
+    body = json['body'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    auction = json['auction'] != null
+        ? new AuctionData.fromJson(json['auction'])
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['title'] = this.title;
+    data['body'] = this.body;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    if (this.user != null) {
+      data['user'] = this.user.toJson();
+    }
+    if (this.auction != null) {
+      data['auction'] = this.auction.toJson();
+    }
+  return data;
   }
 }

@@ -1,43 +1,58 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:division/division.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/diagnostics.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:mazad/core/utils.dart';
+import 'package:mazad/data/models/categories_model.dart';
 import 'package:mazad/data/models/user_home_model.dart';
+import 'package:mazad/presentation/router.gr.dart';
+import 'package:mazad/presentation/state/bidder_store.dart';
 import 'package:mazad/presentation/state/seller_store.dart';
 import 'package:mazad/presentation/widgets/tet_field_with_title.dart';
 import 'package:mazad/presentation/widgets/waiting_widget.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
+import 'package:toast/toast.dart';
 
 class NewAuction extends StatelessWidget {
   Size size;
+  bool canAdd = true;
   TextEditingController initialPriceCtrler = TextEditingController();
+  TextEditingController searchCatCtrler = TextEditingController();
+  TextEditingController searchCityCtrler = TextEditingController();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: BackAppBar(size.height/18),
+      appBar: BackAppBar(size.height / 18),
       body: Center(
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              buildGetPhotos(context),
-              SizedBox(height: 25),
-              catDropDownBtn(),
-              SizedBox(height: 25),
-              buildProps(),
-              SizedBox(height: 25),
-              periodDropDownBtn(),
-              SizedBox(height: 25),
-              startAuctionRebuilder(context)
-            ],
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                buildGetPhotos(context),
+                SizedBox(height: 25),
+                categoriesRebuilder(),
+                SizedBox(height: 25),
+                citiesRebuilder(),
+                SizedBox(height: 25),
+                buildProps(),
+                SizedBox(height: 25),
+                periodDropDownBtn(),
+                SizedBox(height: 25),
+                startAuctionRebuilder(context)
+              ],
+            ),
           ),
         ),
       ),
@@ -117,44 +132,99 @@ class NewAuction extends StatelessWidget {
         width: size.width * 0.7, title: "الفئة", dropDownBtn: dropDownBtn);
   }
 
-  List<String> categories = ['سيارات', 'عقارات', 'أجهزة كهربية'];
+  // List<String> categories = ['سيارات', 'عقارات', 'أجهزة كهربية'];
   String selectedCat;
-  int selectedCatID = 1;
-  Widget catDropDownBtn() {
-    return CustomBorderedWidget(
-      width: size.width * 0.7,
-      title: "الفئة",
-      dropDownBtn: StatefulBuilder(
-        builder: (context, setState) {
-          return DropdownButton(
-            style: TextStyle(fontFamily: 'bein'),
-            isExpanded: true,
-            underline: Container(),
-            value: selectedCat,
-            hint: Txt(
-              'إختر الفئة',
-              style: TxtStyle()..textAlign.right(),
-            ),
-            items: List.generate(
-              categories.length,
-              (index) => DropdownMenuItem(
-                child: Txt(
-                  categories[index],
-                  style: TxtStyle()
-                    ..textAlign.right()
-                    ..alignment.center(),
-                ),
-                value: categories[index],
-              ),
-            ),
-            onChanged: (s) => setState(() {
-              selectedCat = s;
-              selectedCatID = categories.indexOf(s) + 1;
-            }),
-          );
-        },
-      ),
-    );
+  int selectedCatID;
+  String selectedCity;
+  int selectedCityID;
+  // Widget catDropDownBtn(List<Category> categories) {
+  //   if (categories.isNotEmpty) categories.removeAt(0);
+  //   return CustomBorderedWidget(
+  //     width: size.width * 0.7,
+  //     title: "الفئة",
+  //     dropDownBtn: categories.isEmpty
+  //         ? Container(
+  //             height: size.height / 16,
+  //           )
+  //         : StatefulBuilder(
+  //             builder: (context, setState) {
+  //               return DropdownButton(
+  //                 style: TextStyle(fontFamily: 'bein'),
+  //                 isExpanded: true,
+  //                 underline: Container(),
+  //                 value: selectedCat,
+  //                 hint: Txt(
+  //                   'إختر الفئة',
+  //                   style: TxtStyle()..textAlign.right(),
+  //                 ),
+  //                 items: List.generate(
+  //                   categories.length,
+  //                   (index) => DropdownMenuItem(
+  //                     child: Txt(
+  //                       categories[index].name,
+  //                       style: TxtStyle()
+  //                         ..textAlign.right()
+  //                         ..alignment.center(),
+  //                     ),
+  //                     value: categories[index].name,
+  //                   ),
+  //                 ),
+  //                 onChanged: (s) => setState(() {
+  //                   selectedCat = s;
+  //                   selectedCatID = categories
+  //                       .firstWhere((category) => category.name == s)
+  //                       ?.id;
+  //                   print(selectedCatID);
+  //                 }),
+  //               );
+  //             },
+  //           ),
+  //   );
+  // }
+
+  final bidderRM = Injector.getAsReactive<BidderStore>();
+  getCategories() {
+    bidderRM.setState((state) => state.getCategories());
+  }
+
+  getCities() {
+    bidderRM.setState((state) => state.getCities());
+  }
+
+  Widget categoriesRebuilder() {
+    getCategories();
+    return WhenRebuilder(
+        onIdle: () => searchCatWidget(),
+        onWaiting: () => bidderRM.state.categoriesModel == null
+            ? searchCatWidget()
+            : searchCatWidget(),
+        onError: (e) => bidderRM.state.categoriesModel == null
+            ? searchCatWidget()
+            : searchCatWidget(),
+        onData: (d) => searchCatWidget(),
+        models: [bidderRM]);
+  }
+
+  Widget citiesRebuilder() {
+    getCities();
+    return WhenRebuilder(
+        onIdle: () => searchCityWidget(),
+        onWaiting: () => bidderRM.state.cititesModel == null
+            ? searchCityWidget()
+            : searchCityWidget(),
+        onError: (e) => bidderRM.state.cititesModel == null
+            ? searchCityWidget()
+            : searchCityWidget(),
+        onData: (d) => searchCityWidget(),
+        models: [bidderRM]);
+  }
+
+  String initPriceValidator(String s) {
+    if (s.isEmpty && selectedPeriodID != 1) return 'من فضلك أدخل سعر ابتدائي';
+  }
+
+  String emptyFieldValidator(String s) {
+    if (s.isEmpty) return 'هذا الحقل مطلوب';
   }
 
   List<String> periods = [
@@ -182,7 +252,7 @@ class NewAuction extends StatelessWidget {
                 style: TxtStyle()..textAlign.right(),
               ),
               items: List.generate(
-                categories.length,
+                periods.length,
                 (index) => DropdownMenuItem(
                   child: Txt(
                     periods[index],
@@ -208,6 +278,8 @@ class NewAuction extends StatelessWidget {
               visible: selectedPeriodID != null && selectedPeriodID != 1,
               child: TetFieldWithTitle(
                 textEditingController: initialPriceCtrler,
+                inputType: TextInputType.number,
+                validator: initPriceValidator,
                 title: 'سعر ابتدائي',
               ))
         ],
@@ -220,6 +292,7 @@ class NewAuction extends StatelessWidget {
     return TetFieldWithTitle(
       minLines: 3,
       textEditingController: descCtrler,
+      validator: emptyFieldValidator,
       title: 'المواصفات',
     );
   }
@@ -238,6 +311,10 @@ class NewAuction extends StatelessWidget {
 
   final sellerRM = Injector.getAsReactive<SellerStore>();
   startAuction() async {
+    print('STARTING AUCTION...');
+    if (!_formKey.currentState.validate()) return;
+    if (!canAdd) return;
+    canAdd = false;
     // List<Future<ByteData>> futures = [];
     // _images.forEach((img) {
     //   futures.add(img.getByteData());
@@ -249,21 +326,32 @@ class NewAuction extends StatelessWidget {
     // });
     // final imageNames = List.generate(_images.length, (i)=>_images[i].name);
     final map = await StylesD.getImageListFromAssets(_images);
-    sellerRM.setState((state) => state.addAuction(
-        AuctionData(
-          catId: '$selectedCatID',
-          desc: '${descCtrler.text}',
-          duration: '$selectedPeriodID',
-          intialPrice: '${initialPriceCtrler.text}',
-          address: 'Mansoura',
-          lat: '2.2',
-          lng: '2.2',
-        ),
-        map.first,
-        map.last));
+    sellerRM.setState(
+        (state) => state.addAuction(
+            AuctionData(
+              catId: '$selectedCatID',
+              desc: '${descCtrler.text}',
+              duration: '$selectedPeriodID',
+              intialPrice: '${initialPriceCtrler.text}',
+              cityID: selectedCityID,
+              address: 'Mansoura',
+              lat: '2.2',
+              lng: '2.2',
+            ),
+            map.first,
+            map.last), onData: (context, data) {
+      Toast.show('تم اضافة مزادك بنجاح', context, duration: Toast.LENGTH_LONG);
+      ExtendedNavigator.rootNavigator.pop();
+    }, onError: (context, error) {
+      canAdd = true;
+      print('$error');
+      AlertDialogs.failed(
+          context: context, content: 'تعذر إضافة المزاد من فضلك حاول مرة أخرى');
+    });
   }
 
   Widget startAuctionRebuilder(context) {
+    
     return WhenRebuilder(
         onWaiting: () => WaitingWidget(),
         onIdle: () => buildStartAuction(context),
@@ -274,5 +362,127 @@ class NewAuction extends StatelessWidget {
         onData: (d) => buildStartAuction(context),
         models: [sellerRM]);
   }
-}
 
+  String catValidator(String s) {
+    if (s.isEmpty)
+      return 'من فضلك أدخل الفئة التى ينتمى لها المزاد';
+    else if (selectedCatID == null) return 'من فضلك اختر من الفئات المتاحة';
+  }
+
+  String cityValidator(String s) {
+    if (s.isEmpty)
+      return 'من فضلك أدخل المدينة المعروض فيها المزاد';
+    else if (selectedCityID == null) return 'من فضلك اختر من المدن المتاحة';
+  }
+
+  Widget searchCatWidget() {
+    return Container(
+      width: size.width * 0.7,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Txt(
+            'الفئة',
+            style: TxtStyle()
+              ..fontSize(14)
+              ..fontWeight(FontWeight.bold),
+          ),
+          TypeAheadFormField<Category>(
+            validator: catValidator,
+            suggestionsBoxDecoration: SuggestionsBoxDecoration(
+                // constraints: BoxConstraints.tightFor(width: size.width * 0.5),
+                hasScrollbar: true,
+                borderRadius: BorderRadius.circular(12)),
+            textFieldConfiguration: TextFieldConfiguration(
+              // focusNode: searchCatNode,
+              controller: searchCatCtrler,
+
+              textAlign: TextAlign.center,
+              style: TextStyle(fontFamily: 'bein', height: 1),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            onSuggestionSelected: (cat) {
+              selectedCatID = cat?.id;
+              searchCatCtrler.text = cat.name;
+            },
+            itemBuilder: (_, cat) => Txt(
+              '${cat.name}',
+              style: TxtStyle()
+                ..textAlign.center()
+                ..width(size.width * 0.5)
+                ..padding(bottom: 5),
+            ),
+            suggestionsCallback: (suggestion) => Future.sync(
+              () => bidderRM.state.categoriesModel.data.where(
+                (cat) => cat.name.toLowerCase().contains(
+                      suggestion.toLowerCase(),
+                    ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget searchCityWidget() {
+    return Container(
+      width: size.width * 0.7,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Txt(
+            'المدينة',
+            style: TxtStyle()
+              ..fontSize(14)
+              ..fontWeight(FontWeight.bold),
+          ),
+          TypeAheadFormField<Category>(
+            validator: cityValidator,
+            suggestionsBoxDecoration: SuggestionsBoxDecoration(
+                // constraints: BoxConstraints.tightFor(width: size.width * 0.5),
+                hasScrollbar: true,
+                borderRadius: BorderRadius.circular(12)),
+            textFieldConfiguration: TextFieldConfiguration(
+              // focusNode: searchCatNode,
+              controller: searchCityCtrler,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontFamily: 'bein', height: 1),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            onSuggestionSelected: (cat) {
+              selectedCityID = cat?.id;
+              searchCityCtrler.text = cat.city;
+            },
+            itemBuilder: (_, cat) => Txt(
+              '${cat.city}',
+              style: TxtStyle()
+                ..textAlign.center()
+                ..width(size.width * 0.5)
+                ..padding(bottom: 5),
+            ),
+            suggestionsCallback: (suggestion) => Future.sync(
+              () => bidderRM.state.cititesModel.data.where(
+                (cat) => cat.city.toLowerCase().contains(
+                      suggestion.toLowerCase(),
+                    ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

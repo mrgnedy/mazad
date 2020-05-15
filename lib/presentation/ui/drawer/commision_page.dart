@@ -4,7 +4,11 @@ import 'package:auto_route/auto_route.dart';
 import 'package:division/division.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:mazad/core/api_utils.dart';
 import 'package:mazad/core/utils.dart';
+import 'package:mazad/data/models/payments_model.dart';
+import 'package:mazad/data/models/settings_model.dart';
+import 'package:mazad/presentation/state/auth_store.dart';
 import 'package:mazad/presentation/state/seller_store.dart';
 import 'package:mazad/presentation/widgets/waiting_widget.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
@@ -17,26 +21,38 @@ class CommisionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
-    return Scaffold(
-      appBar: BackAppBar(size.height / 18),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
+    return SafeArea(
+      child: Scaffold(
+        appBar: BackAppBar(
+            size.height / 10,
             Txt(
-              "عمولة التطبيق",
+              'دفع العمولة',
               style: TxtStyle()
-                ..fontSize(24)
-                ..textColor(ColorsD.main)
-                ..alignment.coordinate(0.7, 1),
+                ..fontSize(20)
+                ..textColor(ColorsD.main),
+            )),
+        body: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                // Txt(
+                //   "عمولة التطبيق",
+                //   style: TxtStyle()
+                //     ..fontSize(24)
+                //     ..textColor(ColorsD.main)
+                //     ..alignment.coordinate(0.7, 1),
+                // ),
+                // SizedBox(height: size.height / 10),
+                // Txt(
+                //   'العمولة: 1%',
+                //   style: TxtStyle()..fontSize(20)..textDirection(TextDirection.rtl),
+                // ),
+                getPaymentRebuilder(),
+                buildGetPhoto(),
+                sendCommissionRebuilder()
+              ],
             ),
-            SizedBox(height: size.height / 10),
-            Txt(
-              'العمولة: 200 ريال',
-              style: TxtStyle()..fontSize(20),
-            ),
-            buildGetPhoto(),
-            sendCommissionRebuilder()
-          ],
+          ),
         ),
       ),
     );
@@ -124,7 +140,8 @@ class CommisionPage extends StatelessWidget {
       print(e);
       return AlertDialogs.failed(content: e.toString(), context: context);
     }, onData: (_, __) {
-      ExtendedNavigator.rootNavigator.pushReplacementNamed(Routes.commisionSuccess);
+      ExtendedNavigator.rootNavigator
+          .pushReplacementNamed(Routes.commisionSuccess);
     });
   }
 
@@ -147,5 +164,114 @@ class CommisionPage extends StatelessWidget {
         onError: (e) => commissionWidget(),
         onData: (d) => commissionWidget(),
         models: [sellerRM]);
+  }
+
+  final authRM = Injector.getAsReactive<AuthStore>();
+
+  getPaymentInfo() {
+    authRM.setState((state) => state.getPayment().then((s) {
+          if (state.settingsModel == null)
+            authRM.setState((state) => state.getSettings());
+        }));
+  }
+
+  Widget getPaymentWidget() {
+    final settings = SettingsInfo.fromJson(authRM.state.settingsModel);
+    final bankInfo = authRM.state.paymentsModel.data.first;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[contactItem(bankInfo), commisionsWidget(settings)],
+    );
+  }
+
+  Widget getPaymentRebuilder() {
+    getPaymentInfo();
+    return WhenRebuilder(
+      onWaiting: () => WaitingWidget(),
+      onError: (e) => Container(),
+      onData: (d) => getPaymentWidget(),
+      onIdle: () => getPaymentWidget(),
+      models: [authRM],
+    );
+  }
+
+  Widget commisionsWidget(SettingsInfo commisions) {
+    return Parent(
+      style: StylesD.cartStyle.clone()..margin(top:0, horizontal: 16),
+      child: Column(
+        children: <Widget>[
+          Txt(
+            'تفاصيل العمولة',
+            style: TxtStyle()
+              ..fontSize(16)
+              ..textColor(ColorsD.main)
+              ..padding(bottom: 10),
+          ),
+          StylesD.richText('عمولة المزادات المباشرة',
+              '${commisions.livecommission}', size.width * 0.5),
+          StylesD.richText('عمولة المزادات اليومية',
+              '${commisions.dailycommission}', size.width * 0.5),
+          StylesD.richText('عمولة المزادات الأسبوعية',
+              '${commisions.weekcommission}', size.width * 0.5),
+        ],
+      ),
+    );
+  }
+
+  Widget contactItem(PaymentInfo bank) {
+    return Parent(
+      style: StylesD.cartStyle,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Txt(
+              "تفاصيل الحساب",
+              style: TxtStyle()
+                ..fontSize(16)
+                ..textColor(ColorsD.main)
+                ..padding(bottom: 10),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              // crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Column(
+                  // mainAxisSize: MainAxisSize.max,
+
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    Txt('اسم البنك: ${bank.accountName}',
+                        style: TxtStyle()
+                          ..textColor(ColorsD.main)
+                          ..fontFamily('bein')),
+                    StylesD.richText(
+                        'صاحب الحساب', '${bank.accountName}', size.width * 0.4),
+                    StylesD.richText(
+                        'رقم الإبان', '${bank.iban}', size.width * 0.45),
+                    StylesD.richText('رقم الحساب', '${bank.accountNumber}',
+                        size.width * 0.45),
+                  ],
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      '${APIs.imageProfileUrl}${bank.image}',
+                      height: size.height / 8.8,
+                      // width: size.width / 4.5,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

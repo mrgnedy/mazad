@@ -61,7 +61,7 @@ class _MainPageState extends State<MainPage> {
               ],
             ),
           ),
-          bottomNavigationBar: Directionality(
+          bottomNavigationBar: Injector.getAsReactive<AuthStore>().state.credentialsModel ==null? null: Directionality(
             textDirection: TextDirection.ltr,
             child: FancyBottomNavigation(
               tabs: <TabData>[

@@ -7,9 +7,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:mazad/presentation/ui/auctionDetails/auction_details.dart';
 import 'package:mazad/presentation/ui/role_selection.dart';
 import 'package:mazad/presentation/ui/auth/register.dart';
-import 'package:mazad/presentation/ui/auction_details.dart';
 import 'package:mazad/data/models/user_home_model.dart';
 import 'package:mazad/presentation/ui/sellerPages/navigationPages/add_auction.dart';
 import 'package:mazad/presentation/ui/mainPage.dart';
@@ -20,6 +20,9 @@ import 'package:mazad/presentation/ui/drawer/commision_finished_page.dart';
 import 'package:mazad/presentation/widgets/map.dart';
 import 'package:mazad/presentation/ui/drawer/contact_us.dart';
 import 'package:mazad/presentation/ui/drawer/about_us.dart';
+import 'package:mazad/presentation/ui/auth/forgot_passowrd.dart';
+import 'package:mazad/presentation/ui/navigationPages/notification_page.dart';
+import 'package:mazad/presentation/ui/auth/rechangepassword.dart';
 
 abstract class Routes {
   static const roleSelectionPage = '/';
@@ -34,6 +37,9 @@ abstract class Routes {
   static const mapScreen = '/map-screen';
   static const contactUsPage = '/contact-us-page';
   static const aboutUsPage = '/about-us-page';
+  static const forgetPassword = '/forget-password';
+  static const notificationScreen = '/notification-screen';
+  static const rechangePasswordScreen = '/rechange-password-screen';
 }
 
 class Router extends RouterBase {
@@ -88,8 +94,16 @@ class Router extends RouterBase {
           settings: settings,
         );
       case Routes.verifyScreen:
+        if (hasInvalidArgs<VerifyScreenArguments>(args)) {
+          return misTypedArgsRoute<VerifyScreenArguments>(args);
+        }
+        final typedArgs =
+            args as VerifyScreenArguments ?? VerifyScreenArguments();
         return MaterialPageRoute<dynamic>(
-          builder: (_) => VerifyScreen(),
+          builder: (_) => VerifyScreen(
+              key: typedArgs.key,
+              phone: typedArgs.phone,
+              isForgetPass: typedArgs.isForgetPass),
           settings: settings,
         );
       case Routes.changePasswordScreen:
@@ -129,7 +143,25 @@ class Router extends RouterBase {
             args as AboutUsPageArguments ?? AboutUsPageArguments();
         return MaterialPageRoute<dynamic>(
           builder: (_) => AboutUsPage(
-              key: typedArgs.key, info: typedArgs.info, title: typedArgs.title),
+              key: typedArgs.key,
+              info: typedArgs.info,
+              title: typedArgs.title,
+              isFromRegister: typedArgs.isFromRegister),
+          settings: settings,
+        );
+      case Routes.forgetPassword:
+        return MaterialPageRoute<dynamic>(
+          builder: (_) => ForgetPassword(),
+          settings: settings,
+        );
+      case Routes.notificationScreen:
+        return MaterialPageRoute<dynamic>(
+          builder: (_) => NotificationScreen(),
+          settings: settings,
+        );
+      case Routes.rechangePasswordScreen:
+        return MaterialPageRoute<dynamic>(
+          builder: (_) => RechangePasswordScreen(),
           settings: settings,
         );
       default:
@@ -163,6 +195,14 @@ class MainPageArguments {
   MainPageArguments({this.key, this.isSeller});
 }
 
+//VerifyScreen arguments holder class
+class VerifyScreenArguments {
+  final Key key;
+  final String phone;
+  final bool isForgetPass;
+  VerifyScreenArguments({this.key, this.phone, this.isForgetPass});
+}
+
 //MapScreen arguments holder class
 class MapScreenArguments {
   final Function setLocation;
@@ -174,5 +214,7 @@ class AboutUsPageArguments {
   final Key key;
   final String info;
   final String title;
-  AboutUsPageArguments({this.key, this.info, this.title});
+  final bool isFromRegister;
+  AboutUsPageArguments(
+      {this.key, this.info, this.title, this.isFromRegister = false});
 }

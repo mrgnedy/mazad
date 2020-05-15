@@ -1,12 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:division/division.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+// import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mazad/presentation/router.gr.dart';
 import 'package:mazad/presentation/state/auth_store.dart';
 import 'package:mazad/presentation/state/bidder_store.dart';
 import 'package:mazad/presentation/state/seller_store.dart';
-import 'package:mazad/presentation/ui/auction_details.dart';
 import 'package:mazad/presentation/ui/auth/changePass.dart';
 import 'package:mazad/presentation/ui/auth/register.dart';
 import 'package:mazad/presentation/ui/bidderPages/bidder_home_page.dart';
@@ -57,17 +56,17 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  setNotificationChannel() async {
-    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'your channel id', 'your channel name', 'your channel description',
-        importance: Importance.Max, priority: Priority.High, ticker: 'ticker');
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-    var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(
-        0, 'plain title', 'plain body', platformChannelSpecifics,
-        payload: 'item x');
-  }
+  // setNotificationChannel() async {
+  //   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  //       FlutterLocalNotificationsPlugin();
+  //   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+  //       'your channel id', 'your channel name', 'your channel description',
+  //       importance: Importance.Max, priority: Priority.High, ticker: 'ticker');
+  //   var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+  //   var platformChannelSpecifics = NotificationDetails(
+  //       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+  //   await flutterLocalNotificationsPlugin.show(
+  //       0, 'plain title', 'plain body', platformChannelSpecifics,
+  //       payload: 'item x');
+  // }
 }

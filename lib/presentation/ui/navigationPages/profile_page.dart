@@ -1,15 +1,20 @@
 import 'dart:io';
 
+import 'package:app_settings/app_settings.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:division/division.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoder/geocoder.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:mazad/core/utils.dart';
 import 'package:mazad/data/models/register_model.dart';
 import 'package:mazad/presentation/state/auth_store.dart';
 import 'package:mazad/presentation/widgets/tet_field_with_title.dart';
 import 'package:mazad/presentation/widgets/waiting_widget.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:toast/toast.dart';
+import 'package:mazad/core/api_utils.dart';
 
 import '../../router.gr.dart';
 
@@ -30,11 +35,11 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     // TODO: implement initState
-    nameCtrler = TextEditingController(text: 'عبده');
-    phoneCtrler = TextEditingController(text: '01011121314');
-    accountCtrler = TextEditingController(text: '461469347891203');
-    addressCtrler =
-        TextEditingController(text: 'ميدان كفر مية وانت ازيك بجااا');
+    final creds = authRM.state.credentialsModel.data;
+    nameCtrler = TextEditingController(text: '${creds.name}');
+    phoneCtrler = TextEditingController(text: '${creds.phone}');
+    accountCtrler = TextEditingController(text: '${creds.accountNumber}');
+    addressCtrler = TextEditingController(text: '${creds.address}');
     super.initState();
   }
 
@@ -44,16 +49,30 @@ class _ProfilePageState extends State<ProfilePage> {
     return SafeArea(
       child: Scaffold(
         appBar: PreferredSize(
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                IconButton(
+            child: Container(
+              width: size.width*0.5,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  IconButton(
                     icon: Icon(Icons.edit),
-                    onPressed: () => setState(() => isEdit = !isEdit))
-              ],
+                    onPressed: () => setState(() => isEdit = !isEdit),
+                  ),
+                  Txt(
+                    'الصفحة الشخصية',
+                    style: TxtStyle()
+                      ..textColor(ColorsD.main)
+                      ..width(size.width*0.5)
+                      ..fontSize(24)
+                      ..textAlign.right()
+                      ..alignmentContent.coordinate(-0.4,0.5)
+                      // ..alignment.coordinate(0.5, 0.5),
+                  ),
+                ],
+              ),
             ),
-            preferredSize: Size.fromHeight(size.height / 12)),
+            preferredSize: Size(size.width * 0.8, size.height / 16)),
         body: Center(
           child: SingleChildScrollView(child: profileWidget()),
         ),
@@ -64,16 +83,20 @@ class _ProfilePageState extends State<ProfilePage> {
   // getProfileData() {
   //   authRM.setState((state) => state.getProfile());
   // }
-
+  Position position;
+  double lat = 0.0;
+  double lng = 0.0;
   Widget profileWidget() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         InkWell(
-          onTap: () async {
-            _image = await StylesD.getProfilePicture(context);
-            setState(() {});
-          },
+          onTap: isEdit
+              ? () async {
+                  _image = await StylesD.getProfilePicture(context);
+                  setState(() {});
+                }
+              : null,
           child: Container(
             child: Align(
                 alignment: FractionalOffset(1, 1),
@@ -81,13 +104,23 @@ class _ProfilePageState extends State<ProfilePage> {
             height: size.height / 8,
             width: size.height / 8,
             decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: ColorsD.main),
-                image: DecorationImage(
-                    image: isImage
-                        ? FileImage(_image)
-                        : AssetImage('assets/icons/logo.png'),
-                    fit: BoxFit.cover)),
+              shape: BoxShape.circle,
+              border: Border.all(color: ColorsD.main),
+              image: DecorationImage(
+                  image: isImage
+                      ? FileImage(_image)
+                      : NetworkImage(
+                          // height: size.height / 8,
+                          // width: size.height / 8,
+                          // imageUrl:
+                          '${APIs.imageProfileUrl}${authRM.state.credentialsModel.data.image}',
+                          // placeholder: (context, imageS) =>
+                          //     imageS.contains('null')
+                          //         ? StylesD.noImageWidget()
+                          // : WaitingWidget(),
+                        ),
+                  fit: BoxFit.cover),
+            ),
           ),
         ),
         SizedBox(height: 30),
@@ -97,18 +130,37 @@ class _ProfilePageState extends State<ProfilePage> {
           textEditingController: nameCtrler,
         ),
         TetFieldWithTitle(
-          title: 'رفم الجوال',
+          title: 'رقم الجوال',
           isEditable: isEdit,
           textEditingController: phoneCtrler,
         ),
         TetFieldWithTitle(
           title: 'رقم الحساب',
           isEditable: isEdit,
+          isPassword: true,
+          isVisible: false,
           textEditingController: accountCtrler,
         ),
         TetFieldWithTitle(
           title: 'العنوان',
           isEditable: isEdit,
+          icon: InkWell(
+            child: Icon(Icons.location_on),
+            onTap: () async {
+              if ((await Geolocator().checkGeolocationPermissionStatus()) ==
+                  GeolocationStatus.disabled)
+                AppSettings.openLocationSettings();
+              position = (await ExtendedNavigator.rootNavigator
+                  .pushNamed(Routes.mapScreen)) as Position;
+              addressCtrler.text = (await Geocoder.local
+                      .findAddressesFromCoordinates(
+                          Coordinates(position.latitude, position.longitude)))
+                  .first
+                  .addressLine;
+              lat = position?.latitude ?? 0.0;
+              lng = position?.longitude ?? 0.0;
+            },
+          ),
           textEditingController: addressCtrler,
         ),
         SizedBox(height: 30),
@@ -140,21 +192,24 @@ class _ProfilePageState extends State<ProfilePage> {
     authRM.setState(
       (state) => state.editProfile(
           Credentials(
-            accountNumber: 'accountCtrler.text',
+            accountNumber: '1',
             address: addressCtrler.text,
-            lat: '0.0',
-            lng: '0.0',
+            lat: '$lat',
+            lng: '$lng',
             email: 'sad',
             name: nameCtrler.text,
             phone: phoneCtrler.text,
           ),
-          _image.path),
+          _image?.path),
       onError: (context, e) {
         print(e);
       },
       onData: (context, e) {
         Toast.show("تم تعديل بيانات حسابك بنجاح", context,
             duration: Toast.LENGTH_LONG);
+        setState(() {
+          isEdit = false;
+        });
         print(e);
       },
     );
@@ -189,7 +244,9 @@ class _ProfilePageState extends State<ProfilePage> {
       children: <Widget>[
         Icon(Icons.edit),
         Txt('تغيير كلمة المرور',
-            gesture: Gestures()..onTap(()=>ExtendedNavigator.rootNavigator.pushNamed(Routes.changePasswordScreen)),
+            gesture: Gestures()
+              ..onTap(() => ExtendedNavigator.rootNavigator
+                  .pushNamed(Routes.changePasswordScreen)),
             style: TxtStyle()
               ..fontSize(18)
               ..textColor(ColorsD.main)),

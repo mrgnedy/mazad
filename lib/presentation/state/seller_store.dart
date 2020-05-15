@@ -32,4 +32,17 @@ class SellerStore {
     AuctionModel.fromJson(await sellerRepo.getAuctionDetails(id.toString()));
     return currentAuction; 
   }
+  Future<GeneralModel> deleteAuction(int auctionID)async{
+    return GeneralModel.fromJson(await sellerRepo.deleteAuction(auctionID));
+  }
+  Future<GeneralModel> returnAuction(int auctionID)async{
+    return GeneralModel.fromJson(await sellerRepo.returnAuction(auctionID));
+  }
+
+  Future<GeneralModel> editDetails(int auctionID, String desc)async{
+    return GeneralModel.fromJson(await sellerRepo.editDetails(auctionID, desc));
+  }
+  Future<GeneralModel> editPrice(int opID, String price)async{
+    return GeneralModel.fromJson(await sellerRepo.editPrice(opID, price));
+  }
 }

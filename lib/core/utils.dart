@@ -18,6 +18,39 @@ class ColorsD {
 
 class StylesD {
   static Size size;
+  static Widget richText(String mainText, String subText, double width) {
+    return Parent(
+      // alignment: Alignment.,
+      style: ParentStyle()
+        ..alignment.centerRight()
+        ..margin(left: 12)
+        ..width(width)
+        ..alignment.center(),
+      child: RichText(
+        textAlign: TextAlign.right,
+        textDirection: TextDirection.rtl,
+        maxLines: 3,
+        overflow: TextOverflow.ellipsis,
+        text: TextSpan(
+
+          children: [
+            TextSpan(
+                text: '$mainText: ',
+                style: TextStyle(
+                    color: ColorsD.main, fontFamily: 'bein', )),
+            TextSpan(
+                text: '$subText',
+                style: TextStyle(
+                    height: 1.5,
+                    color: Colors.grey[800],
+                    fontFamily: 'bein',
+                    )),
+          ],
+        ),
+      ),
+    );
+  }
+
   static TxtStyle mazadBtnStyle = TxtStyle()
     ..borderRadius(all: 12)
     ..textColor(Colors.white)
@@ -39,6 +72,9 @@ class StylesD {
   static getMultiPictures(List<Asset> images) {
     return MultiImagePicker.pickImages(
         enableCamera: true,
+        materialOptions: MaterialOptions(
+          startInAllView: true,
+        ),
         // selectedAssets: images,
         maxImages: 10);
   }
@@ -49,11 +85,10 @@ class StylesD {
       double width,
       BoxShape shape,
       BorderRadius borderRadius,
-      Function callback 
-      }) {
+      Function callback}) {
     return InkWell(
       onTap: callback,
-          child: Container(
+      child: Container(
         height: height,
         width: width,
         // padding: EdgeInsets.all(12),
@@ -77,8 +112,9 @@ class StylesD {
             ),
           ),
           fit: BoxFit.cover,
-          placeholder: (context, imageL) =>
-              imageL.contains('null') ? StylesD.noImageWidget() : WaitingWidget(),
+          placeholder: (context, imageL) => imageL.contains('null')
+              ? StylesD.noImageWidget()
+              : WaitingWidget(),
         ),
       ),
     );
@@ -197,6 +233,7 @@ class StylesD {
   }
 
   static showErrorDialog(context, error, [Function callback]) {
+    print('$error');
     return AlertDialogs.failed(context: context, content: error.toString());
   }
 
@@ -334,6 +371,7 @@ class AlertDialogs {
             child: Txt(content,
                 style: StylesD.txtStyle.clone()
                   ..textDirection(TextDirection.rtl)
+                  ..fontFamily('bein')
                   ..textAlign.center()),
           ),
         ),
@@ -354,7 +392,9 @@ class AlertDialogs {
                   width: MediaQuery.of(context).size.width / 2,
                   child: Txt(
                     'موافق',
-                    style: TxtStyle()..textColor(Colors.white),
+                    style: TxtStyle()
+                      ..fontFamily('bein')
+                      ..textColor(Colors.white),
                   ),
                   color: ColorsD.main,
                   onTapCallback: () => Navigator.of(context).pop(true),
@@ -461,7 +501,7 @@ class BackAppBar extends PreferredSize {
   final Widget title;
   // Size size;
 
-  BackAppBar( this.preferredHeight, [this.title ]);
+  BackAppBar(this.preferredHeight, [this.title]);
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -470,10 +510,10 @@ class BackAppBar extends PreferredSize {
       return Parent(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             Image.asset('assets/icons/back.png'),
-            title??Container()
+            title ?? Container()
           ],
         ),
         style: ParentStyle()

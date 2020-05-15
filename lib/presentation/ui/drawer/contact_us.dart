@@ -7,6 +7,7 @@ import 'package:mazad/presentation/widgets/tet_field_with_title.dart';
 import 'package:mazad/presentation/widgets/waiting_widget.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:toast/toast.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ContactUsPage extends StatelessWidget {
   Size size;
@@ -107,14 +108,56 @@ class ContactUsPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          IconButton(icon: Icon(FontAwesomeIcons.twitter), onPressed: () {}),
-          IconButton(icon: Icon(FontAwesomeIcons.facebook), onPressed: () {}),
-          IconButton(icon: Icon(FontAwesomeIcons.google), onPressed: () {}),
-          IconButton(icon: Icon(FontAwesomeIcons.instagram), onPressed: () {}),
-          IconButton(icon: Icon(FontAwesomeIcons.whatsapp), onPressed: () {}),
-          IconButton(icon: Icon(FontAwesomeIcons.phone), onPressed: () {}),
+          IconButton(
+              icon: Icon(FontAwesomeIcons.twitter), onPressed: launchTwitter),
+          IconButton(
+              icon: Icon(FontAwesomeIcons.facebook), onPressed: launchFacebook),
+          IconButton(
+              icon: Icon(FontAwesomeIcons.google), onPressed: launchGmail),
+          IconButton(
+              icon: Icon(FontAwesomeIcons.instagram), onPressed: launchinsta),
+          IconButton(
+              icon: Icon(FontAwesomeIcons.whatsapp), onPressed: launchWhatsapp),
+          IconButton(
+              icon: Icon(FontAwesomeIcons.phone), onPressed: launchPhone),
         ],
       ),
     );
+  }
+
+  launchFacebook() async {
+    final facebookName = authRM.state.settingsModel['facebook'];
+    final facebookURL = 'fb.me/$facebookName';
+    if (await canLaunch(facebookURL)) await launch(facebookURL);
+  }
+
+  launchWhatsapp() async {
+    final whatsappPhone = authRM.state.settingsModel['whatsapp'];
+    final url = 'whatsapp://send?phone=/$whatsappPhone';
+    if (await canLaunch(url)) await launch(url);
+  }
+
+  launchPhone() async {
+    final whatsappPhone = authRM.state.settingsModel['first_phone'];
+    final url = 'tel:$whatsappPhone';
+    if (await canLaunch(url)) await launch(url);
+  }
+
+  launchGmail() async {
+    final whatsappPhone = authRM.state.settingsModel['google'];
+    final url = 'mailto:$whatsappPhone';
+    if (await canLaunch(url)) await launch(url);
+  }
+
+  launchTwitter() async {
+    final whatsappPhone = authRM.state.settingsModel['twitter'];
+    final url = 'twitter://user?screen_name=$whatsappPhone';
+    if (await canLaunch(url)) await launch(url);
+  }
+
+  launchinsta() async {
+    final whatsappPhone = authRM.state.settingsModel['instagram'];
+    final url = 'http://instagram.com/_u/$whatsappPhone';
+    if (await canLaunch(url)) await launch(url);
   }
 }

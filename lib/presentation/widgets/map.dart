@@ -39,7 +39,7 @@ class _MapScreenState extends State<MapScreen> {
       child: Scaffold(
         
         appBar: AppBar(
-          title: Text('حدد مكان المناسبة', style: TextStyle(fontFamily: 'Cairo'),),
+          title: Text('حدد موقعك', style: TextStyle(fontFamily: 'bein'),),
           centerTitle: true,
           leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: ()=>ExtendedNavigator.rootNavigator.pop(currentPos)),
           actions: <Widget>[

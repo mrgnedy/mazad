@@ -14,6 +14,7 @@ class CommisionSuccess extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Image.asset('assets/icons/right.png'),
             Padding(

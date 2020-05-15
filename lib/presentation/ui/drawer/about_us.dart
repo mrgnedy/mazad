@@ -1,20 +1,28 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:division/division.dart';
 import 'package:flutter/material.dart';
 import 'package:mazad/core/utils.dart';
+
 import 'package:mazad/presentation/state/auth_store.dart';
 import 'package:mazad/presentation/widgets/error_widget.dart';
 import 'package:mazad/presentation/widgets/waiting_widget.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 
+import '../../router.gr.dart';
+
 class AboutUsPage extends StatelessWidget {
+  final bool isFromRegister;
   final String info;
   final String title;
   final authRM = Injector.getAsReactive<AuthStore>();
-  AboutUsPage({Key key, this.info, this.title}) : super(key: key);
+  Size size;
+  AboutUsPage({Key key, this.info, this.title, this.isFromRegister = false})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
+    size = MediaQuery.of(context).size;
     return Scaffold(
+      bottomSheet: isFromRegister ? acceptTerms() : null,
       appBar: BackAppBar(
         size.height / 8,
         Txt(
@@ -36,15 +44,68 @@ class AboutUsPage extends StatelessWidget {
 
   Widget infoWidget() {
     return SingleChildScrollView(
-        child: Txt('${authRM.state.settingsModel[info]}',style: TxtStyle()..textAlign.center()..fontSize(18)..alignment.center(),));
+        child: Txt(
+      '${authRM.state.settingsModel[info]}',
+      style: TxtStyle()
+        ..textAlign.center()
+        ..fontSize(18)
+        ..alignment.center(),
+    ));
   }
 
   Widget infoRebuilder() {
     return WhenRebuilder(
-        onIdle: ()=>infoWidget(),
-        onWaiting: ()=>WaitingWidget(),
-        onError: (e)=>OnErrorWidget('لا توجد بيانات', getInfo),
-        onData: (data)=>infoWidget(),
+        onIdle: () => infoWidget(),
+        onWaiting: () => WaitingWidget(),
+        onError: (e) => OnErrorWidget('لا توجد بيانات', getInfo),
+        onData: (data) => infoWidget(),
         models: [authRM]);
+  }
+
+  Widget acceptTerms() {
+    bool isAccept = false;
+    return Container(
+      height: size.height / 6.5,
+      child: BottomSheet(
+          onClosing: () {},
+          builder: (context) => StatefulBuilder(builder: (context, ss) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    CheckboxListTile(
+                        value: isAccept,
+                        title: Txt(
+                          'أوافق على الشروط والأحكام',
+                          style: TxtStyle()
+                            ..textAlign.right()
+                            ..fontFamily('bein'),
+                        ),
+                        onChanged: (s) {
+                          ss(() => isAccept = s);
+                        }),
+                    Txt(
+                      'الدخول',
+                      gesture: Gestures()
+                        ..onTap(
+                          () => isAccept == false
+                              ? null
+                              : ExtendedNavigator.rootNavigator
+                                  .pushNamedAndRemoveUntil(Routes.mainPage,
+                                      (Route<dynamic> route) => false,
+                                      arguments: MainPageArguments(
+                                          isSeller:
+                                              authRM.state.selectedRole == 1)),
+                        ),
+                      style: StylesD.mazadBtnStyle.clone()
+                        ..margin(all: 0)
+                        ..background
+                            .color(isAccept ? ColorsD.main : Colors.grey)
+                        ..width(size.width * 0.5)
+                        ..height(size.height / 16),
+                    )
+                  ],
+                );
+              })),
+    );
   }
 }

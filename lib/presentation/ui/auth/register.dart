@@ -2,6 +2,7 @@ import 'package:app_settings/app_settings.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:division/division.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mazad/core/utils.dart';
@@ -44,22 +45,26 @@ class _RegisterPageState extends State<AuthPage> {
     confirmPasswordCtrler.dispose();
     // TODO: implement dispose
     super.dispose();
-  }  getToken(String token){
-        print('$token');
-        fcmToken = token;
-      }
+  }
 
-      String fcmToken;
+  getToken(String token) {
+    print('$token');
+    fcmToken = token;
+  }
+
+  String fcmToken;
 
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     // TODO: implement initState
     authRM = Injector.getAsReactive<AuthStore>();
-      FirebaseNotifications firebaseNotifications= FirebaseNotifications.getToken(getToken);
+    FirebaseNotifications firebaseNotifications =
+        FirebaseNotifications.getToken(getToken);
 
     super.initState();
   }
+
   Position position;
   double lat;
   double lng;
@@ -72,64 +77,113 @@ class _RegisterPageState extends State<AuthPage> {
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  Image.asset(
-                    'assets/icons/logo.png',
-                    height: size.height / 5,
-                    width: size.height / 5,
-                  ),
-                  Txt(
-                    'تسجيل ${isCreate ? 'جديد' : 'الدخول'}',
-                    style: TxtStyle()
-                      ..fontSize(24)
-                      ..textColor(ColorsD.main),
-                  ),
-                  TetFieldWithTitle(
-                    title: 'إسم المستخدم',
-                    textEditingController: nameCtrler,
-                    isVisible: isCreate,
-                  ),
-                  TetFieldWithTitle(
-                    title: 'رقم الجوال',
-                    textEditingController: phoneCtrler,
-                  ),
-                  TetFieldWithTitle(
-                    title: 'البريد الالكترونى',
-                    isVisible: isCreate,
-                    textEditingController: emailCtrler,
-                  ),
-                  TetFieldWithTitle(
-                    title: 'كلمة المرور',
-                    textEditingController: passwordCtrler,
-                    isPassword: true,
-                  ),
-                  TetFieldWithTitle(
-                    title: 'رقم الحساب',
-                    textEditingController: accountCtrler,
-                    isPassword: true,
-                    isVisible: isCreate,
-                    icon: Parent(child: Icon(Icons.remove_red_eye)),
-                  ),
-                  TetFieldWithTitle(
-                    title: 'العنوان',
-                    textEditingController: addressCtrler,
-                    isVisible: isCreate,
-                    icon:
-                        Parent(child: InkWell(
-                          onTap: ()async{
-                            if((await Geolocator().checkGeolocationPermissionStatus()) == GeolocationStatus.disabled)
-                            AppSettings.openLocationSettings();
-                            position = (await ExtendedNavigator.rootNavigator.pushNamed(Routes.mapScreen))as Position;
-                            addressCtrler.text = (await Geocoder.local.findAddressesFromCoordinates(Coordinates(position.latitude, position.longitude))).first.addressLine;
-                            lat = position?.latitude??0.0;
-                            lng = position?.longitude??0.0;
-                          },
-                          child: Icon(Icons.location_on))),
-                  ),
-                  buildRegister(),
-                  accountOrNot()
-                ],
+              child: Container(
+                width: size.width,
+                height: size.height,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    Center(
+                      child: SingleChildScrollView(
+                        physics: NeverScrollableScrollPhysics(),
+                        child: Column(
+                          children: <Widget>[
+                            Image.asset(
+                              'assets/icons/logo.png',
+                              height: size.height / 5,
+                              width: size.height / 5,
+                            ),
+                            Txt(
+                              'تسجيل ${isCreate ? 'جديد' : 'الدخول'}',
+                              style: TxtStyle()
+                                ..fontSize(24)
+                                ..textColor(ColorsD.main),
+                            ),
+                            TetFieldWithTitle(
+                              title: 'إسم المستخدم',
+                              textEditingController: nameCtrler,
+                              isVisible: isCreate,
+                            ),
+                            TetFieldWithTitle(
+                              title: 'رقم الجوال',
+                              textEditingController: phoneCtrler,
+                              icon: Container(
+                                  width: size.width / 7,
+                                  child: Txt('+966',
+                                      style: TxtStyle()
+                                        ..textDirection(TextDirection.ltr)
+                                        ..alignment.centerRight()
+                                        ..width(size.width / 9))),
+                            ),
+                            TetFieldWithTitle(
+                              title: 'البريد الالكترونى',
+                              isVisible: isCreate,
+                              textEditingController: emailCtrler,
+                            ),
+                            TetFieldWithTitle(
+                              title: 'كلمة المرور',
+                              textEditingController: passwordCtrler,
+                              isPassword: true,
+                            ),
+                            TetFieldWithTitle(
+                              title: 'رقم الحساب',
+                              textEditingController: accountCtrler,
+                              isPassword: true,
+                              isVisible: false,
+                              icon: Parent(child: Icon(Icons.remove_red_eye)),
+                            ),
+                            TetFieldWithTitle(
+                              title: 'العنوان',
+                              textEditingController: addressCtrler,
+                              isVisible: isCreate,
+                              icon: Parent(
+                                child: InkWell(
+                                  onTap: () async {
+                                    if ((await Geolocator()
+                                            .checkGeolocationPermissionStatus()) ==
+                                        GeolocationStatus.disabled)
+                                      AppSettings.openLocationSettings();
+                                    position = (await ExtendedNavigator
+                                            .rootNavigator
+                                            .pushNamed(Routes.mapScreen))
+                                        as Position;
+                                    addressCtrler.text = (await Geocoder.local
+                                            .findAddressesFromCoordinates(
+                                                Coordinates(position.latitude,
+                                                    position.longitude)))
+                                        .first
+                                        .addressLine;
+                                    lat = position?.latitude ?? 0.0;
+                                    lng = position?.longitude ?? 0.0;
+                                  },
+                                  child: Icon(Icons.location_on),
+                                ),
+                              ),
+                            ),
+                            buildRegister(),
+                            accountOrNot(),
+                            forgetPasswordBtn()
+                          ],
+                        ),
+                      ),
+                    ),
+                    Visibility(
+                      visible: widget.userType != 1,
+                      child: Align(
+                        child: Txt(
+                          'تخطي',
+                          gesture: Gestures()
+                            ..onTap(() => ExtendedNavigator.rootNavigator
+                                .pushNamed(Routes.mainPage)),
+                          style: TxtStyle()
+                            ..fontSize(18)
+                            ..textColor(Colors.red)
+                            ..alignment.coordinate(-0.7, -0.9),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
@@ -150,34 +204,46 @@ class _RegisterPageState extends State<AuthPage> {
     }
     Credentials registerData = Credentials(
       name: nameCtrler.text,
-      phone: phoneCtrler.text,
+      phone: '+966${phoneCtrler.text}',
       password: passwordCtrler.text,
-      accountNumber: accountCtrler.text,
+      accountNumber: '1${accountCtrler.text}',
       address: addressCtrler.text,
-      userType: '1',
+      userType: '${widget.userType ?? 2}',
       email: emailCtrler.text,
-      lat: '$lat',
-      lng: '$lng',
+      lat: '0.0',
+      lng: '0.0',
       googleToken: '$fcmToken',
     );
     if (isCreate)
       authRM.setState((state) => state.register(registerData),
-          onError: StylesD.showErrorDialog,
-          onData: (_, store) =>
-              ExtendedNavigator.rootNavigator.pushNamed(Routes.verifyScreen));
+          onError: StylesD.showErrorDialog, onData: (_, store) {
+        Clipboard.setData(ClipboardData(
+            text: store.unConfirmedcredentialsModel?.verifyNumber));
+        HapticFeedback.vibrate();
+        ExtendedNavigator.rootNavigator.pushNamed(Routes.verifyScreen, arguments: VerifyScreenArguments(phone: '+966${phoneCtrler.text}', isForgetPass: false));
+      });
     else
       authRM.setState((state) => state.login(registerData),
           onError: (context, error) {
             return StylesD.showErrorDialog(context, error).then((e) {
-              if (error.toString().contains('active'))
-                ExtendedNavigator.rootNavigator.pushNamed(Routes.verifyScreen);
+              if (error.toString().contains('active')) {
+                print(phoneCtrler.text);
+                authRM.setState((state) =>
+                    state.resendVerify(phoneCtrler.text).then((creds) {
+                      Clipboard.setData(ClipboardData(text: creds));
+                      HapticFeedback.vibrate();
+                    }));
+                ExtendedNavigator.rootNavigator.pushNamed(Routes.verifyScreen,
+                    arguments: VerifyScreenArguments(
+                        phone: '+966${phoneCtrler.text}', isForgetPass: false));
+              }
             });
           },
           onData: (_, store) => ExtendedNavigator.rootNavigator
               .pushNamedAndRemoveUntil(
                   Routes.mainPage, (Route<dynamic> route) => false,
                   arguments: MainPageArguments(
-                      isSeller: authRM.state.userType == '1' ? true : false)));
+                      isSeller: authRM.state.selectedRole == 1 ? true : false)));
   }
 
   Widget onAuthRebuilder() {
@@ -213,6 +279,23 @@ class _RegisterPageState extends State<AuthPage> {
                 style: TextStyle(color: Colors.black, fontFamily: 'bein')),
             TextSpan(
                 text: isCreate ? 'تسجيل الدخول' : 'انشاء حساب',
+                style: TextStyle(color: ColorsD.main, fontFamily: 'bein')),
+          ])),
+    );
+  }
+
+  Widget forgetPasswordBtn(){
+    return  InkWell(
+      onTap: () => setState(() => ExtendedNavigator.rootNavigator.pushNamed(Routes.forgetPassword)),
+      child: RichText(
+          textAlign: TextAlign.center,
+          textDirection: TextDirection.rtl,
+          text: TextSpan(children: [
+            TextSpan(
+                text: 'نسيت كلمة المرور؟ ',
+                style: TextStyle(color: Colors.black, fontFamily: 'bein')),
+            TextSpan(
+                text: 'استرجاع كلمة المرور',
                 style: TextStyle(color: ColorsD.main, fontFamily: 'bein')),
           ])),
     );

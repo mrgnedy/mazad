@@ -11,4 +11,12 @@ class BidderRepo {
     Map<String, dynamic> body = {'auction_id': '$auctionID', 'price': '$price'};
     return await APIs.postRequest(url, body); 
   }
+  Future getCats()async{
+    String url = APIs.categoriesEP;
+    return await APIs.getRequest(url);
+  }
+  Future getCities()async{
+    String url = APIs.citiesEP;
+    return await APIs.getRequest(url);
+  }
 }

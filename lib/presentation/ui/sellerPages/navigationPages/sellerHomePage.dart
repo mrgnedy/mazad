@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:division/division.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:mazad/core/utils.dart';
 import 'package:mazad/data/models/my_auctions.dart';
 import 'package:mazad/data/models/user_home_model.dart';
 import 'package:mazad/presentation/state/seller_store.dart';
+import 'package:mazad/presentation/ui/sellerPages/navigationPages/add_auction.dart';
 import 'package:mazad/presentation/widgets/auction_card.dart';
 import 'package:mazad/presentation/widgets/waiting_widget.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
@@ -12,6 +14,9 @@ import 'package:states_rebuilder/states_rebuilder.dart';
 import '../../../router.gr.dart';
 
 class SellerHomePage extends StatelessWidget {
+  SellerHomePage() {
+    sellerRM.setState((state) => state.getMyAuctions());
+  }
   @override
   // bool isEmpty = true;
   Widget build(BuildContext context) {
@@ -19,24 +24,42 @@ class SellerHomePage extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Scaffold(
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-          floatingActionButton: Padding(
-              padding: EdgeInsets.only(bottom: 25, right: 18),
-              child: FloatingActionButton(
-                  backgroundColor: ColorsD.main,
-                  child: Icon(
-                    Icons.add,
-                    size: 35,
-                  ),
-                  onPressed: () => ExtendedNavigator.rootNavigator
-                      .pushNamed(Routes.newAuction))),
+          floatingActionButton: OpenContainer(
+            transitionType: ContainerTransitionType.fade,
+            closedBuilder: (context, _) => floatingActionBtn(),
+            openBuilder: (context, _) => NewAuction(),
+            transitionDuration: Duration(milliseconds: 600),
+            closedColor: ColorsD.main,
+            closedElevation: 6.0,
+            openElevation: 6.0,
+            closedShape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+            openShape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          ),
           body: Directionality(
               textDirection: TextDirection.ltr, child: whenAuctionRebuilder())),
     );
   }
 
+  Widget floatingActionBtn() {
+    return Padding(
+        padding: EdgeInsets.only(),
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: Center(
+            child: Icon(
+              Icons.add,
+              size: 35,
+              color: Colors.white,
+            ),
+          ),
+        ));
+  }
+
   final sellerRM = Injector.getAsReactive<SellerStore>();
   Widget whenAuctionRebuilder() {
-    sellerRM.setState((state) => state.getMyAuctions());
     return WhenRebuilder<SellerStore>(
         onIdle: () => sellerRM.state.auctionsModel == null
             ? NoAuctions()
@@ -69,7 +92,7 @@ class _AuctionsTabsState extends State<AuctionsTabs>
   TabController tabController;
   @override
   void initState() {
-    tabController = TabController(length: 2, vsync: this);
+    tabController = TabController(length: 2, vsync: this, initialIndex: 1);
     tabController.addListener(() {
       current = tabController.index;
       setState(() {});
@@ -79,7 +102,7 @@ class _AuctionsTabsState extends State<AuctionsTabs>
     super.initState();
   }
 
-  int current = 0;
+  int current = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -108,8 +131,8 @@ class _AuctionsTabsState extends State<AuctionsTabs>
                   right: current == 1 ? Radius.circular(12) : Radius.zero),
             ),
             tabs: [
-              tabItem('مزادات قائمة', true),
-              tabItem('مزادات منتهية', false),
+              tabItem('مزادات منتهية', true),
+              tabItem('مزادات قائمة', false),
             ],
           ),
         ),
@@ -118,12 +141,18 @@ class _AuctionsTabsState extends State<AuctionsTabs>
             child: TabBarView(
           controller: tabController,
           children: <Widget>[
-            AvailableAuctions(
-              currentAuctions: widget.allAuctions.intialactions,
-            ),
-            AvailableAuctions(
-              currentAuctions: widget.allAuctions.finishactions,
-            ),
+            widget.allAuctions.finishactions.isEmpty
+                ? NoAuctions(
+                    isCurrent: false,
+                  )
+                : AvailableAuctions(
+                    currentAuctions: widget.allAuctions.finishactions,
+                  ),
+            widget.allAuctions.intialactions.isEmpty
+                ? NoAuctions()
+                : AvailableAuctions(
+                    currentAuctions: widget.allAuctions.intialactions,
+                  ),
           ],
         ))
       ],
@@ -164,6 +193,9 @@ class AvailableAuctions extends StatelessWidget {
 }
 
 class NoAuctions extends StatelessWidget {
+  final bool isCurrent;
+
+  const NoAuctions({Key key, this.isCurrent = true}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -173,20 +205,25 @@ class NoAuctions extends StatelessWidget {
         children: <Widget>[
           Image.asset('assets/icons/auction.png'),
           Txt(
-            'لا توجد لديك مزادات حالية',
+            'لا توجد لديك مزادات ${isCurrent ? 'حالية' : 'منتهية'}',
             style: TxtStyle()
               ..textColor(ColorsD.main)
               ..fontSize(18)
               ..textAlign.center()
               ..margin(all: 12),
           ),
-          Txt(
-            'إضافة',
-            style: StylesD.mazadBtnStyle.clone()
-              ..height(size.height / 17)
-              ..fontSize(18)
-              ..width(size.width * 0.3),
-          ),
+          isCurrent
+              ? Txt(
+                  'إضافة',
+                  gesture: Gestures()
+                    ..onTap(() => ExtendedNavigator.rootNavigator
+                        .pushNamed(Routes.newAuction)),
+                  style: StylesD.mazadBtnStyle.clone()
+                    ..height(size.height / 17)
+                    ..fontSize(18)
+                    ..width(size.width * 0.3),
+                )
+              : Container(),
         ],
       ),
     );

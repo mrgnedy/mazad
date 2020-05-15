@@ -8,11 +8,14 @@ import 'package:states_rebuilder/states_rebuilder.dart';
 
 import '../../router.gr.dart';
 
+
 class DrawerPage extends StatelessWidget {
+final authRM = Injector.getAsReactive<AuthStore>();
   Size size;
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
+    print('ROLE IS ${authRM.state.selectedRole}');
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: Drawer(
@@ -26,14 +29,16 @@ class DrawerPage extends StatelessWidget {
               ),
               SizedBox(height: 50),
               Visibility(
-                visible:
-                    Injector.getAsReactive<AuthStore>().state.userType != '1',
+                visible: Injector.getAsReactive<AuthStore>()
+                        .state
+                        .credentialsModel ==
+                    null,
                 child: drawerItem(
-                  'عمولة التطبيق',
-                  'money',
-                  () => ExtendedNavigator.rootNavigator
-                      .pushNamed(Routes.commisionPage),
-                ),
+                    'تسجيل الدخول',
+                    'profile',
+                    () => ExtendedNavigator.rootNavigator
+                        .pushNamedAndRemoveUntil(
+                            Routes.authPage, (Route<dynamic> route) => false)),
               ),
               drawerItem(
                 'من نحن',
@@ -44,12 +49,6 @@ class DrawerPage extends StatelessWidget {
                         AboutUsPageArguments(info: 'about', title: 'من نحن')),
               ),
               drawerItem(
-                'اتصل بنا',
-                'call',
-                () => ExtendedNavigator.rootNavigator
-                    .pushNamed(Routes.contactUsPage),
-              ),
-              drawerItem(
                 'الشروط والأحكام',
                 'shoroot',
                 () => ExtendedNavigator.rootNavigator.pushNamed(
@@ -57,14 +56,55 @@ class DrawerPage extends StatelessWidget {
                     arguments: AboutUsPageArguments(
                         info: 'policy', title: 'الشروط والأحكام')),
               ),
-              drawerItem('مشاركة التطبيق', 'share', () => Share.share('TEXT')),
               drawerItem(
-                  'تسجيل الخروج',
-                  'exit',
-                  () => ExtendedNavigator.rootNavigator.pushNamedAndRemoveUntil(
+                'اتصل بنا',
+                'call',
+                () => ExtendedNavigator.rootNavigator
+                    .pushNamed(Routes.contactUsPage),
+              ),
+              Visibility(
+                visible:
+                    Injector.getAsReactive<AuthStore>().state.selectedRole == 1,
+                child: drawerItem(
+                  'عمولة التطبيق',
+                  'money',
+                  () => ExtendedNavigator.rootNavigator
+                      .pushNamed(Routes.commisionPage),
+                ),
+              ),
+              drawerItem('مشاركة التطبيق', 'share', () => Share.share('https://play.google.com/store/apps/details?id=com.skinnyg.mazad')),
+              drawerItem(
+                  '${authRM.state.selectedRole == 1 ? "الدخول كمزايد" : "الدخول كبائع"}',
+                  null, () {
+                authRM.state.selectedRole = 3 - authRM.state.selectedRole;
+                if (authRM.state.selectedRole == 1 &&
+                    authRM.state.credentialsModel == null) {
+                  ExtendedNavigator.rootNavigator.pushReplacementNamed(
+                      Routes.authPage,
+                      arguments: AuthPageArguments(
+                          userType: authRM.state.selectedRole));
+                } else
+                  ExtendedNavigator.rootNavigator.pushReplacementNamed(
+                    Routes.mainPage,
+                    arguments: MainPageArguments(
+                        isSeller: 3 - authRM.state.selectedRole == 2),
+                  );
+              }),
+              Visibility(
+                visible: Injector.getAsReactive<AuthStore>()
+                        .state
+                        .credentialsModel !=
+                    null,
+                child: drawerItem('تسجيل الخروج', 'exit', () {
+                  final authRM = Injector.getAsReactive<AuthStore>().state;
+                  authRM.credentialsModel = null;
+                  authRM.unConfirmedcredentialsModel = null;
+                  authRM.pref.clear();
+                  ExtendedNavigator.rootNavigator.pushNamedAndRemoveUntil(
                       Routes.roleSelectionPage,
-                      (Route<dynamic> route) => false),
-                  true),
+                      (Route<dynamic> route) => false);
+                }, true),
+              ),
             ],
           ),
         ),
@@ -85,13 +125,18 @@ class DrawerPage extends StatelessWidget {
             SizedBox(
               width: 12,
             ),
-            Image.asset('assets/icons/$iconName.png'),
+            iconName == null
+                ? Icon(
+                    Icons.sync,
+                    color: ColorsD.main,
+                  )
+                : Image.asset('assets/icons/$iconName.png'),
             Txt(
               '$title',
               style: TxtStyle()
                 ..padding(horizontal: 12)
                 ..fontSize(18)
-                ..textColor(isExit ? Colors.red : ColorsD.main),
+                ..textColor(isExit == true ? Colors.red : ColorsD.main),
             ),
           ],
         ),

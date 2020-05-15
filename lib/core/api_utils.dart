@@ -1,15 +1,14 @@
-import 'dart:io';
-
+import 'package:mazad/presentation/state/auth_store.dart';
+import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mazad/presentation/state/auth_store.dart';
 import 'dart:convert';
-
-import 'package:states_rebuilder/states_rebuilder.dart';
+import 'dart:io';
 
 class APIs {
   static String baseUrl = 'http://mazaad.live/api/';
   static String imageBaseUrl = 'http://mazaad.live/autions/images/';
+  static String imageProfileUrl = 'http://mazaad.live/public/dash/assets/img/';
 //AIzaSyDyZS1lXwrSQfLucsqjh2_XrTlm-ZkHjNU
   static String myauctionsEP = '${baseUrl}myauctions';
   static String addmazadEP = '${baseUrl}addmazad';
@@ -19,6 +18,12 @@ class APIs {
   static String notificationsEP = '${baseUrl}notifications';
   static String homeEP = '${baseUrl}home';
   static String addoperationEP = '${baseUrl}addoperation';
+  static String categoriesEP = '${baseUrl}categories';
+  static String citiesEP = '${baseUrl}cities';
+  static String returnauctionEP = '${baseUrl}returnauction';
+  static String delauctionEP = '${baseUrl}delauction';
+  static String editmazadEP = '${baseUrl}editmazad';
+  static String editpriceEP = '${baseUrl}editoperation';
 
   static String loginEP = '${baseUrl}login';
   static String registerEP = '${baseUrl}register';
@@ -27,18 +32,21 @@ class APIs {
   static String editpassEP = '${baseUrl}editpass';
   static String sendForgetPasswordEP = '${baseUrl}send-forget-password';
   static String verifyForgetPasswordEP = '${baseUrl}verify-forget-password';
+  static String resendVerifyEP = '${baseUrl}resend-phone-verify';
 
   static String profileEP = '${baseUrl}profile';
   static String editprofileEP = '${baseUrl}editprofile';
   static String addcontactEP = '${baseUrl}addcontact';
   static String settinginfoEP = '${baseUrl}settinginfo';
+  static String paymentsEP = '${baseUrl}payments';
 
   static Future getRequest(url,
       {String token = '', BuildContext context}) async {
     final reactiveModel = Injector.getAsReactive<AuthStore>();
     String _token = reactiveModel.state.credentialsModel?.data?.apiToken;
-    _token =
-        'c8GoLrSvefAfqfb2BJ5VXUOUJrSybNAcAd2LeQsNFPGHN60ejuDEV64sSQNblAx75eDpEvz8zFJwe2p6DUkrYjk3LNsimclr6b2v';
+    _token = _token?? reactiveModel.state.unConfirmedcredentialsModel?.data?.apiToken;
+    // _token= _token??
+    //     'c8GoLrSvefAfqfb2BJ5VXUOUJrSybNAcAd2LeQsNFPGHN60ejuDEV64sSQNblAx75eDpEvz8zFJwe2p6DUkrYjk3LNsimclr6b2v';
 
     try {
       final response =
@@ -62,12 +70,10 @@ class APIs {
   static Future postRequest(String url, Map<String, dynamic> body,
       {BuildContext context}) async {
     final reactiveModel = Injector.getAsReactive<AuthStore>();
-    String _token =
-        reactiveModel.state.unConfirmedcredentialsModel?.data?.apiToken;
-    if (_token == null)
-      _token = reactiveModel.state.credentialsModel?.data?.apiToken;
-    _token =
-        'c8GoLrSvefAfqfb2BJ5VXUOUJrSybNAcAd2LeQsNFPGHN60ejuDEV64sSQNblAx75eDpEvz8zFJwe2p6DUkrYjk3LNsimclr6b2v';
+     String _token = reactiveModel.state.credentialsModel?.data?.apiToken;
+    _token = _token?? reactiveModel.state.unConfirmedcredentialsModel?.data?.apiToken;
+    _token= _token??
+        'dGA9CYRHlfGhvjryhD0STklwm3fOqIh7XAYimPheEiKI265b1pjSZJUIHZteeC4hkqSFMlQ4M4XDaSOPSOPmSdbko8UAY2HXCNFG';
 
     print('Posting request');
     print(body);
@@ -105,8 +111,8 @@ class APIs {
     print('Posting with files');
     final reactiveModel = Injector.getAsReactive<AuthStore>();
     String _token = reactiveModel.state.credentialsModel?.data?.apiToken;
-    _token =
-        'c8GoLrSvefAfqfb2BJ5VXUOUJrSybNAcAd2LeQsNFPGHN60ejuDEV64sSQNblAx75eDpEvz8zFJwe2p6DUkrYjk3LNsimclr6b2v';
+    // _token = _token??
+    //     'c8GoLrSvefAfqfb2BJ5VXUOUJrSybNAcAd2LeQsNFPGHN60ejuDEV64sSQNblAx75eDpEvz8zFJwe2p6DUkrYjk3LNsimclr6b2v';
 
     Uri url = Uri.parse(urlString);
     // String image = savedOccasion['image'];

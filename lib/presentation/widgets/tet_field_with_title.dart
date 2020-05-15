@@ -13,6 +13,7 @@ class TetFieldWithTitle extends StatefulWidget {
   final double height;
   final bool isPassword;
   final String hint;
+  final String countryCode;
   // final Function iconCallback;
   final TextEditingController textEditingController;
 
@@ -28,7 +29,9 @@ class TetFieldWithTitle extends StatefulWidget {
       this.textEditingController,
       this.minLines,
       this.height = 1.2,
-      this.isVisible = true, this.hint})
+      this.isVisible = true,
+      this.hint,
+      this.countryCode})
       : super(key: key);
 
   @override
@@ -45,15 +48,17 @@ class _TetFieldWithTitleState extends State<TetFieldWithTitle> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          widget.title == null? Container():Txt(
-            '${widget.title}',
-            style: TxtStyle()
-            ..textColor(ColorsD.main)
-            ..fontSize(18)
-            
-              // ..fontWeight(FontWeight.bold)
-              ..textAlign.right(),
-          ),
+          widget.title == null
+              ? Container()
+              : Txt(
+                  '${widget.title}',
+                  style: TxtStyle()
+                    ..textColor(ColorsD.main)
+                    ..fontSize(18)
+
+                    // ..fontWeight(FontWeight.bold)
+                    ..textAlign.right(),
+                ),
           textFieldWidget(context),
         ],
       ),
@@ -73,15 +78,16 @@ class _TetFieldWithTitleState extends State<TetFieldWithTitle> {
           enabled: widget.isEditable,
           minLines: widget.minLines,
           // key: key,
-            
+
           obscureText: widget.isPassword ? obSecure : false,
           maxLines: widget.isPassword ? 1 : null,
           controller: widget.textEditingController,
           validator: widget.validator,
-        textInputAction: TextInputAction.send,  
+          textInputAction: TextInputAction.send,
           keyboardType: widget.inputType,
           textAlign: TextAlign.right,
           cursorColor: ColorsD.main,
+          textDirection: TextDirection.ltr,
           // showCursor: false,
           style: TextStyle(
             fontFamily:
@@ -92,16 +98,23 @@ class _TetFieldWithTitleState extends State<TetFieldWithTitle> {
             fontSize: 14,
           ),
           decoration: InputDecoration(
-            
             hintText: widget.hint,
-            suffixIcon: widget.isPassword
-                ? InkWell(
-                    onTap: () {
-                      obSecure = !obSecure;
-                      setState(() {});
-                    },
-                    child: Icon(Icons.remove_red_eye))
-                : widget.icon,
+            suffixIcon: widget.countryCode != null
+                ? Container(
+                    width: size.width / 7,
+                    child: Txt('${widget.countryCode}',
+                        style: TxtStyle()
+                          ..textDirection(TextDirection.ltr)
+                          ..alignment.centerRight()
+                          ..width(size.width / 9)))
+                : widget.isPassword
+                    ? InkWell(
+                        onTap: () {
+                          obSecure = !obSecure;
+                          setState(() {});
+                        },
+                        child: Icon(Icons.remove_red_eye))
+                    : widget.icon,
             // enabled: false,
             // labelText: hint,
             // labelStyle:
@@ -111,7 +124,6 @@ class _TetFieldWithTitleState extends State<TetFieldWithTitle> {
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(color: ColorsD.main, width: 2),
               borderRadius: BorderRadius.circular(20),
-
             ),
             errorBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Colors.red, width: 2),

@@ -1,12 +1,14 @@
 class CredentialsModel {
   String msg;
   String apiToken;
+  String verifyNumber;
   Credentials data;
 
   CredentialsModel({this.msg, this.apiToken, this.data});
 
   CredentialsModel.fromJson(Map<String, dynamic> json) {
     msg = json['msg'];
+    verifyNumber = json['verifynumber'].toString();
     apiToken = json['api_token'];
     data = json['data'] != null ? new Credentials.fromJson(json['data']) : null;
   }
@@ -14,6 +16,7 @@ class CredentialsModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['msg'] = this.msg;
+    data['verifynumber'] = this.verifyNumber;
     data['api_token'] = this.apiToken;
     if (this.data != null) {
       data['data'] = this.data.toJson();
@@ -23,26 +26,28 @@ class CredentialsModel {
 }
 
 class Credentials {
-   String name;
-   String email;
-   String phone;
-   String lat;
-   String lng;
-   String address;
-   String image;
-   String type;
-   String accountNumber;
-   String userType;
-   int confirmed;
-   String apiToken;
-   String googleToken;
- String updatedAt;
- String createdAt;
-   String password;
-   String confirmPassword;
-   int id;
+  String name;
+  String email;
+  String phone;
+  String lat;
+  String lng;
+  String address;
+  String image;
+  String type;
+  String accountNumber;
+  String userType;
+  int confirmed;
+  String apiToken;
+  String googleToken;
+  String updatedAt;
+  String createdAt;
+  String password;
+  String confirmPassword;
+  int id;
 
-  Credentials({this.password, this.confirmPassword, 
+  Credentials(
+      {this.password,
+      this.confirmPassword,
       this.name,
       this.email,
       this.phone,
@@ -99,6 +104,7 @@ class Credentials {
     data['id'] = this.id;
     return data;
   }
+
   Map<String, dynamic> register() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['name'] = this.name;
@@ -120,6 +126,7 @@ class Credentials {
     // data['id'] = this.id;
     return data;
   }
+
   Map<String, dynamic> edit() {
     final Map<String, String> data = new Map<String, String>();
     data['name'] = this.name;
@@ -141,6 +148,7 @@ class Credentials {
     // data['id'] = this.id;
     return data;
   }
+
   Map<String, dynamic> login() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['phone'] = this.phone;

@@ -54,7 +54,7 @@ class FirebaseNotifications {
     // });
 
     _firebaseMessaging.configure(
-      onBackgroundMessage: myBackgroundMessageHandler,
+      // onBackgroundMessage: myBackgroundMessageHandler,
       onMessage: (Map<String, dynamic> message) async {
         print('on message $message');
         onMessage(message['notification']['body']);

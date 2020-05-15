@@ -11,9 +11,12 @@ class AuthRepo {
     return await APIs.postRequest(url, body);
   }
 
-  Future verify(String code) async {
+  Future verify(String code, String phone) async {
     String url = APIs.phoneVerifyEP;
-    Map<String, dynamic> body = {'code': '$code'};
+    Map<String, dynamic> body = {
+      'code': '$code',
+      'phone': '$phone'
+    };
     return await APIs.postRequest(url, body);
   }
 
@@ -24,16 +27,14 @@ class AuthRepo {
   }
 
   Future verifyForgetPassword(String phone, String code) async {
-    String url = APIs.sendForgetPasswordEP;
+    String url = APIs.verifyForgetPasswordEP;
     Map<String, dynamic> body = {'phone': '$phone', 'code': '$code'};
     return await APIs.postRequest(url, body);
   }
 
   Future profile(int id) async {
     String url = APIs.profileEP;
-    Map<String,dynamic> body= {
-      'user_id' : '$id'
-    };
+    Map<String, dynamic> body = {'user_id': '$id'};
     return await APIs.postRequest(url, body);
   }
 
@@ -54,7 +55,7 @@ class AuthRepo {
   }
 
   Future rechangePassword(String phone, String password) async {
-    String url = APIs.editpassEP;
+    String url = APIs.rechangepassEP;
     Map<String, dynamic> body = {
       'phone': '$phone',
       'new_pass': '$password',
@@ -63,22 +64,34 @@ class AuthRepo {
     return await APIs.postRequest(url, body);
   }
 
+  Future resendVerify(String phone) async {
+    String url = APIs.resendVerifyEP;
+    Map<String, dynamic> body = {'phone': phone};
+    return await APIs.postRequest(url, body);
+  }
+
   Future getNotifications() async {
     String url = APIs.notificationsEP;
     return await APIs.getRequest(url);
   }
+
   Future sendMsg(String name, String msg, String phone) async {
     String url = APIs.addcontactEP;
     Map<String, dynamic> body = {
-      'message' : '$msg',
-      'name' : '$name',
-      'phone' : '$phone',
-    } ;
+      'message': '$msg',
+      'name': '$name',
+      'phone': '$phone',
+    };
     return await APIs.postRequest(url, body);
   }
 
-  Future getSettings()async{
+  Future getSettings() async {
     String url = APIs.settinginfoEP;
+    return await APIs.getRequest(url);
+  }
+
+  Future getPayment() async{
+    String url = APIs.paymentsEP;
     return await APIs.getRequest(url);
   }
 }

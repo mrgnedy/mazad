@@ -1,12 +1,12 @@
 class SettingsModel {
   String msg;
-  SettingInfo data;
+  SettingsInfo data;
 
   SettingsModel({this.msg, this.data});
 
   SettingsModel.fromJson(Map<String, dynamic> json) {
     msg = json['msg'];
-    data = json['data'] != null ? new SettingInfo.fromJson(json['data']) : null;
+    data = json['data'] != null ? new SettingsInfo.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -19,7 +19,7 @@ class SettingsModel {
   }
 }
 
-class SettingInfo {
+class SettingsInfo {
   int id;
   String siteName;
   String siteLogo;
@@ -32,10 +32,13 @@ class SettingInfo {
   String twitter;
   String facebook;
   String google;
+  String livecommission;
+  String dailycommission;
+  String weekcommission;
   String createdAt;
   String updatedAt;
 
-  SettingInfo(
+  SettingsInfo(
       {this.id,
       this.siteName,
       this.siteLogo,
@@ -48,10 +51,13 @@ class SettingInfo {
       this.twitter,
       this.facebook,
       this.google,
+      this.livecommission,
+      this.dailycommission,
+      this.weekcommission,
       this.createdAt,
       this.updatedAt});
 
-  SettingInfo.fromJson(Map<String, dynamic> json) {
+  SettingsInfo.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     siteName = json['site_name'];
     siteLogo = json['site_logo'];
@@ -64,6 +70,9 @@ class SettingInfo {
     twitter = json['twitter'];
     facebook = json['facebook'];
     google = json['google'];
+    livecommission = json['livecommission'];
+    dailycommission = json['dailycommission'];
+    weekcommission = json['weekcommission'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
@@ -82,6 +91,9 @@ class SettingInfo {
     data['twitter'] = this.twitter;
     data['facebook'] = this.facebook;
     data['google'] = this.google;
+    data['livecommission'] = this.livecommission;
+    data['dailycommission'] = this.dailycommission;
+    data['weekcommission'] = this.weekcommission;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
