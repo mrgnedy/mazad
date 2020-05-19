@@ -18,7 +18,8 @@ class ColorsD {
 
 class StylesD {
   static Size size;
-  static Widget richText(String mainText, String subText, double width) {
+  static Widget richText(String mainText, String subText, double width, [TextStyle style]) {
+    style = style?? TextStyle(height: 1.5, fontFamily: 'bein');
     return Parent(
       // alignment: Alignment.,
       style: ParentStyle()
@@ -35,16 +36,12 @@ class StylesD {
 
           children: [
             TextSpan(
+              
                 text: '$mainText: ',
-                style: TextStyle(
-                    color: ColorsD.main, fontFamily: 'bein', )),
+                style: style.copyWith(color: ColorsD.main)),
             TextSpan(
                 text: '$subText',
-                style: TextStyle(
-                    height: 1.5,
-                    color: Colors.grey[800],
-                    fontFamily: 'bein',
-                    )),
+                style: style.copyWith(color: Colors.grey[800])),
           ],
         ),
       ),

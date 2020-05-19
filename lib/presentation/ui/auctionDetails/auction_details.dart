@@ -8,13 +8,18 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mazad/core/api_utils.dart';
 import 'package:mazad/core/utils.dart';
 import 'package:mazad/data/models/auction_model.dart';
+import 'package:mazad/data/models/categories_model.dart';
 import 'package:mazad/data/models/user_home_model.dart';
 import 'package:mazad/presentation/state/auth_store.dart';
 import 'package:mazad/presentation/state/bidder_store.dart';
 import 'package:mazad/presentation/state/seller_store.dart';
+import 'package:mazad/presentation/ui/auctionDetails/seller_details.dart';
 import 'package:mazad/presentation/ui/drawer/drawer.dart';
 import 'package:mazad/presentation/widgets/tet_field_with_title.dart';
 import 'package:mazad/presentation/widgets/waiting_widget.dart';
+import 'package:mazad/rate_app.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:mazad/presentation/router.gr.dart';
 
@@ -23,14 +28,44 @@ import 'initPrice_N_city.dart';
 
 GlobalKey _finishAuctionKey = GlobalKey();
 
-class AuctionPage extends StatelessWidget {
-  final AuctionData auctionData;
-  bool isNegative;
-  String remainingTime;
+class AuctionPage extends StatefulWidget {
+  AuctionData auctionData;
+
   AuctionPage({Key key, this.auctionData}) : super(key: key) {
     detailsCtrler = TextEditingController(text: auctionData.desc);
   }
+  @override
+  _AuctionPageState createState() => _AuctionPageState();
+
+  TextEditingController detailsCtrler;
+}
+
+class _AuctionPageState extends State<AuctionPage> {
+  bool isNegative;
+
+  String remainingTime;
+
   ScrollController _scrollController = ScrollController();
+  @override
+  void initState() {
+    // TODO: implement initState
+    authRM.setState((state) => state
+        .getProfile(widget.auctionData.userId)
+        .then((profile) => authRM.state.currentSellerProfile = profile));
+    sellerRM.setState(
+        (state) => state.getAuctionDetails(widget.auctionData.id).then((data) {
+              print('THIS IS AUCTION DETAILS $data');
+              if (data != null) sellerRM.resetToHasData();
+              setState(() {
+                widget.auctionData = data.data.first.auction;
+              });
+              _finishAuctionKey.currentState.setState(() {});
+            }));
+    content =
+        'السعر الذي أدخلته غير مناسب\nأقل قيمة للزيادة: ${widget.auctionData.minvalue}\nأكبر قيمة للزيادة: ${widget.auctionData.maxvalue}';
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
@@ -61,11 +96,11 @@ class AuctionPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: SingleChildScrollView(
-                  controller: _scrollController,
+                  // controller: _scrollController,
                   child: Column(children: [
-                    PhotoGallery(images: auctionData.images),
+                    PhotoGallery(images: widget.auctionData.images),
                     Divider(),
-                    auctionDetails(),
+                    Hero(tag: 'sellerHero', child: SellerInfo()),
                     // AuctionDetails(
                     //   details: auctionData.desc,
                     //   auctionID: auctionData.id,
@@ -73,11 +108,19 @@ class AuctionPage extends StatelessWidget {
                     //       auctionData.userId,
                     // ),
                     Divider(),
-                    InitPriceAndCity(price: auctionData.intialPrice, cityID: auctionData.cityID,),
+                    InitPriceAndCity(
+                      price: widget.auctionData.intialPrice,
+                      cityID: widget.auctionData.cityID,
+                    ),
+                    Divider(),
+                    auctionDetails(),
+                    Divider(),
                     TimeRemaining(timeRemaining: remainingTime),
                     Divider(),
                     Bidders(
-                        id: auctionData.id, finishAuctionKey: _finishAuctionKey)
+                        scrollController: _scrollController,
+                        id: widget.auctionData.id,
+                        finishAuctionKey: _finishAuctionKey)
                   ]),
                 ),
               ),
@@ -90,7 +133,7 @@ class AuctionPage extends StatelessWidget {
 
   getTime() {
     final timeRemaining = DateTime.tryParse(
-      auctionData.deletetime,
+      widget.auctionData.deletetime,
     ).toLocal().difference(DateTime.now().add(Duration(hours: -3)));
     isNegative = timeRemaining.isNegative;
     String time = timeRemaining.isNegative
@@ -100,11 +143,13 @@ class AuctionPage extends StatelessWidget {
   }
 
   bool isEdit = false;
+
   final authRM = Injector.getAsReactive<AuthStore>();
+
   Widget auctionDetails() {
     bool isMyAuction =
-        authRM.state.credentialsModel?.data?.id == auctionData.userId;
-    print(detailsCtrler.text);
+        authRM.state.credentialsModel?.data?.id == widget.auctionData.userId;
+    print(widget.detailsCtrler.text);
     return StatefulBuilder(
         key: detailsKey,
         builder: (context, setState) {
@@ -133,7 +178,7 @@ class AuctionPage extends StatelessWidget {
                 child: TextField(
                   enabled: isEdit,
                   maxLines: null,
-                  controller: detailsCtrler,
+                  controller: widget.detailsCtrler,
                   textAlign: TextAlign.right,
                   style:
                       TextStyle(fontSize: 18, fontFamily: 'bein', height: 1.7),
@@ -154,7 +199,8 @@ class AuctionPage extends StatelessWidget {
                       'رجوع',
                       gesture: Gestures()
                         ..onTap(() => setState(() {
-                              detailsCtrler.text = auctionData.desc;
+                              widget.detailsCtrler.text =
+                                  widget.auctionData.desc;
                               isEdit = false;
                             })),
                       style: StylesD.mazadBorderdBtnStyle.clone()
@@ -188,16 +234,18 @@ class AuctionPage extends StatelessWidget {
   }
 
   final sellerRM = Injector.getAsReactive<SellerStore>();
+
   GlobalKey detailsKey = GlobalKey();
-  TextEditingController detailsCtrler;
+
   editDetails() {
     detailsKey.currentState.setState(() => isEdit = false);
     sellerRM.setState(
-        (state) => state.editDetails(auctionData.id, detailsCtrler.text),
+        (state) =>
+            state.editDetails(widget.auctionData.id, widget.detailsCtrler.text),
         onData: (context, data) {
       // tempDetails = detailsCtrler.text;
     }, onError: (context, error) {
-      detailsCtrler.text = auctionData.desc;
+      widget.detailsCtrler.text = widget.auctionData.desc;
       print(error);
       AlertDialogs.failed(
           context: context,
@@ -206,8 +254,12 @@ class AuctionPage extends StatelessWidget {
   }
 
   finishAuctionOnTap() {
-    sellerRM.setState((state) => state.finishAuction(auctionData.id.toString()),
+    sellerRM.setState(
+        (state) => state.finishAuction(widget.auctionData.id.toString()),
         onData: (_, store) {
+      Future.delayed(
+          Duration(seconds: 1), () => AppRate.rateIfAvailable(context));
+
       store.getMyAuctions().then((_) => ExtendedNavigator.rootNavigator.pop());
     }, onError: (context, e) {
       StylesD.showErrorDialog(context, e);
@@ -261,7 +313,7 @@ class AuctionPage extends StatelessWidget {
                       size: 80, color: ColorsD.main),
                   SizedBox(height: 25),
                   Txt(
-                    'السعر الذى أدخلته أقل من السعر المتاح\nحاول مرة أخرى',
+                    content,
                     style: TxtStyle()
                       ..textAlign.center()
                       ..textColor(ColorsD.main)
@@ -278,20 +330,33 @@ class AuctionPage extends StatelessWidget {
     _operationKey.currentState.setState(() {
       FocusScope.of(context).requestFocus(FocusNode());
       bidderRM.setState(
-          (state) => state.addOperation(
-              num.parse(priceCtrler.text.toString()), auctionData.id),
-          onData: (context, data) => sellerRM.setState((state) {
-                return state.getAuctionDetails(auctionData.id).then((_) {
-                  _operationKey.currentState.setState(() {});
-                });
-              }, onData: (_, __) {
-                Future.delayed(
-                    Duration(milliseconds: 2),
-                    () => _scrollController.animateTo(
-                        _scrollController.position.minScrollExtent,
-                        duration: Duration(seconds: 1),
-                        curve: Curves.bounceIn));
-              }));
+        (state) => state.addOperation(
+            num.parse(priceCtrler.text.toString()), widget.auctionData.id),
+        onError: (context, error) {
+          print(error.toString());
+          AlertDialogs.failed(context: context, content: error.toString());
+        },
+        onData: (context, data) => sellerRM.setState(
+          (state) {
+            return state.getAuctionDetails(widget.auctionData.id).then(
+              (_) {
+                _operationKey.currentState.setState(() {});
+              },
+            );
+          },
+          onData: (_, __) {
+            setState(() {});
+            Future.delayed(
+                Duration(seconds: 1), () => AppRate.rateIfAvailable(context));
+            Future.delayed(
+                Duration(milliseconds: 2),
+                () => _scrollController.animateTo(
+                    _scrollController.position.minScrollExtent,
+                    duration: Duration(seconds: 1),
+                    curve: Curves.bounceIn));
+          },
+        ),
+      );
       priceCtrler.clear();
     });
   }
@@ -299,8 +364,8 @@ class AuctionPage extends StatelessWidget {
   Widget operationBottomSheet() {
     int myID =
         Injector.getAsReactive<AuthStore>().state.credentialsModel?.data?.id;
-    bool isMyAuction = myID == auctionData.userId;
-    return auctionData.type == '1' || isNegative
+    bool isMyAuction = myID == widget.auctionData.userId;
+    return widget.auctionData.type == '1' || isNegative
         ? null
         : BottomSheet(
             elevation: 10,
@@ -315,7 +380,9 @@ class AuctionPage extends StatelessWidget {
   }
 
   TextEditingController priceCtrler = TextEditingController();
+
   GlobalKey<FormState> _formKey = GlobalKey();
+
   Widget addOperationWidget(Widget icon) {
     return Container(
       height: size.height / 13,
@@ -346,6 +413,7 @@ class AuctionPage extends StatelessWidget {
   }
 
   GlobalKey _operationKey = GlobalKey();
+
   Widget addOperationRebuilder() {
     return Container(
       height: size.height / 13,
@@ -392,21 +460,45 @@ class AuctionPage extends StatelessWidget {
     });
   }
 
+  String content;
+  AuctionD get currentAuction => sellerRM.state.currentAuction.data.first;
   String priceValidator(String s) {
-    num initPrice = auctionData.intialPrice.contains('null')
-        ? 0
-        : num.parse(auctionData.intialPrice);
+    num initPrice = widget.auctionData.intialPrice.contains('null')
+        ? 1
+        : num.parse(currentAuction.auction.intialPrice);
+    initPrice = initPrice == 0 ? 1 : initPrice;
     num price = num.parse(priceCtrler.text.toString());
-    final operations = Injector.getAsReactive<SellerStore>()
-        .state
-        .currentAuction
-        .data
-        .first
-        .operations;
+    final operations = currentAuction.operations;
     List<int> operationPrices = List.generate(operations.length,
         (index) => int.parse(operations[index].price.toString()));
-    num largest = operationPrices.isEmpty ? 0 : operationPrices.reduce(max);
-    if (price <= largest || price < initPrice) return '';
+    num largest =
+        operationPrices.isEmpty ? initPrice - 1 : operationPrices.reduce(max);
+    // final bidderRM=Injector.getAsReactive<BidderStore>();
+    // List<Category> allAqarCats = bidderRM.state.categoriesModel.data.where((cat)=>cat.name.contains('عقار')).toList();
+    // List<int> aqarCatIDs = List.generate((allAqarCats.length), (index)=>allAqarCats[index].id);
+    // bool isAqar = aqarCatIDs.contains(int.parse(widget.auctionData.catId));
+    // print('ALL AQAR IDS $aqarCatIDs');
+    // print('THIS AQAR ID ${widget.auctionData.catId}');
+    // print('IS AQAR: $isAqar');
+    num maxValue = currentAuction.auction.maxvalue.contains('null')
+        ? 1000 ^ 10
+        : num.parse(currentAuction.auction.maxvalue);
+    num minValue = currentAuction.auction.minvalue.contains('null')
+        ? 0
+        : num.parse(currentAuction.auction.minvalue);
+    num allowedBid = maxValue + largest;
+    // num allowedBid = (isAqar? 100000:10000) + largest;
+    print('THIS IS CURRENT AUCTION: ${allowedBid}');
+    if (price < initPrice) {
+      content = 'السعر الذى أدخلته أقل من السعر الإبتدائي';
+      return '';
+    } else if ((price < largest + minValue || price > allowedBid) &&
+        operations.isNotEmpty) {
+      content =
+          'السعر الذي أدخلته غير مناسب\nأقل قيمة للزيادة: ${currentAuction.auction.minvalue}\nأكبر قيمة للزيادة: ${currentAuction.auction.maxvalue}';
+
+      return '';
+    }
   }
 }
 
@@ -562,7 +654,6 @@ Size size;
 //   }
 // }
 
-
 class PhotoGallery extends StatefulWidget {
   final List<Images> images;
 
@@ -573,6 +664,7 @@ class PhotoGallery extends StatefulWidget {
 
 class _PhotoGalleryState extends State<PhotoGallery> {
   List<String> _imageUrls;
+  List<PhotoViewGalleryPageOptions> imageViewList;
   int currentIndex = 0;
 
   @override
@@ -584,12 +676,22 @@ class _PhotoGalleryState extends State<PhotoGallery> {
             widget.images.length, (index) => widget.images[index].image);
     _imageUrls = _imageUrls.where((image) => image != null).toList();
     if (_imageUrls.isEmpty) _imageUrls = List.generate(3, (_) => null);
+    imageViewList = List.generate(_imageUrls.length, (index) {
+      return PhotoViewGalleryPageOptions(
+          imageProvider:
+              NetworkImage('${APIs.imageBaseUrl}${_imageUrls[index]}'),
+          controller: photoViewCtrler);
+    });
 
     super.initState();
   }
 
+  PageController imageCtrler;
+  PhotoViewController photoViewCtrler = PhotoViewController();
+
   @override
   Widget build(BuildContext context) {
+    imageCtrler = PageController(initialPage: currentIndex);
     final size = MediaQuery.of(context).size;
     return Container(
       width: 1000,
@@ -600,7 +702,25 @@ class _PhotoGalleryState extends State<PhotoGallery> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                buildImage(_imageUrls[currentIndex], false, true),
+                InkWell(
+                    onTap: () =>
+                        // showDialog(
+                        //       context: context,
+                        //       builder: (context) => Dialog(
+                        //         backgroundColor: Colors.black.withOpacity(0.2),
+                        //         child: ,
+                        //       ),
+                        //     ),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PhotoViewGallery(
+                              pageOptions: imageViewList,
+                              pageController: imageCtrler,
+                            ),
+                          ),
+                        ),
+                    child: buildImage(_imageUrls[currentIndex], false, true)),
                 Container(
                   // width: 1000,
                   height: 100,
@@ -614,6 +734,9 @@ class _PhotoGalleryState extends State<PhotoGallery> {
                           onTap: () {
                             setState(() {
                               currentIndex = index;
+                              // imageCtrler.animateToPage(index, duration: Duration(milliseconds: 200), curve: Curves.easeInCubic);
+                              // photoViewCtrler.initial = PhotoViewControllerValue(position: null, scale: null, rotation: null, rotationFocusPoint: null)
+                              // photoViewCtrler.``
                             });
                           },
                           child: buildImage(

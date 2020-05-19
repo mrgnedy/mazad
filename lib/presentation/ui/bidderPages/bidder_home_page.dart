@@ -201,12 +201,13 @@ class _BidderHomePageState extends State<BidderHomePage>
 
   PreferredSize buildAppBar() {
     return PreferredSize(
-      preferredSize: Size.fromHeight(size.height / 8),
+      preferredSize: Size.fromHeight(size.height /10),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(
             width: size.width * 0.85,
+            padding: EdgeInsets.only(top:10),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -255,6 +256,7 @@ class _BidderHomePageState extends State<BidderHomePage>
   }
 
   getCategories() {
+    if(bidderRM.state.categoriesModel == null)
     bidderRM.setState((state) => state.getCategories());
   }
 
@@ -266,41 +268,7 @@ class _BidderHomePageState extends State<BidderHomePage>
         animation: animationController,
         builder: (context, child) {
           return Container(
-            /*
-           isExpanded
-              ? TypeAheadFormField<Category>(
-                  textFieldConfiguration: TextFieldConfiguration(
-                    controller: searchCatCtrler,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'bein', height: 1),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                  onSuggestionSelected: (cat) => setState(() {
-                    selectedCatID = cat.id.toString();
-                    selectedCategory = cat.name;
-                    searchCatCtrler.text = selectedCategory;
-                    isExpanded = false;
-                  }),
-                  itemBuilder: (_, cat) => Txt(
-                    '${cat.name}',
-                    style: TxtStyle()
-                      ..textAlign.center()
-                      ..padding(bottom: 5),
-                  ),
-                  suggestionsCallback: (suggestion) => Future.sync(
-                    () => bidderRM.state.categoriesModel.data.where(
-                      (cat) => cat.name.toLowerCase().contains(
-                            suggestion.toLowerCase(),
-                          ),
-                    ),
-                  ),
-                )
-              :
-           */
+            
             width: searchBarAnim.value.width,
             height: searchBarAnim.value.height,
             child: Stack(

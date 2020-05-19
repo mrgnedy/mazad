@@ -36,11 +36,13 @@ class AuctionD {
     auction =
         json['auction'] != null ? new AuctionData.fromJson(json['auction']) : null;
     if (json['operations'] != null) {
-      operations = new List<Operations>();
+      operations = [];
+      operations =  List<Operations>();
       json['operations'].forEach((v) {
         operations.add(new Operations.fromJson(v));
       });
-       operations.sort((a,b)=>num.tryParse(b.price).compareTo(num.tryParse(a.price)));
+      //  operations.sort((a,b)=>num.tryParse(b.price).compareTo(num.tryParse(a.price)));
+      //  operations = operations.reversed.toList();
     }
   }
 
@@ -63,11 +65,13 @@ class Operations {
   String userName;
   String userImage;
   String price;
+  String balance;
 
-  Operations({this.id, this.userName, this.userImage, this.price, this.userId});
+  Operations({this.id, this.userName, this.userImage, this.price, this.userId, this.balance});
 
   Operations.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    balance = json['balance'].toString();
     userName = json['user_name'];
     userImage = json['user_image'];
     userId = json['user_id'];
@@ -80,6 +84,7 @@ class Operations {
     data['user_name'] = this.userName;
     data['user_image'] = this.userImage;
     data['price'] = this.price;
+    data['balance'] = this.balance;
     data['user_id'] = this.userId;
     return data;
   }

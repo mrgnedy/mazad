@@ -3,14 +3,14 @@ import 'package:division/division.dart';
 import 'package:flutter/material.dart';
 import 'package:mazad/core/utils.dart';
 import 'package:mazad/presentation/state/auth_store.dart';
+import 'package:mazad/rate_app.dart';
 import 'package:share/share.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 
 import '../../router.gr.dart';
 
-
 class DrawerPage extends StatelessWidget {
-final authRM = Injector.getAsReactive<AuthStore>();
+  final authRM = Injector.getAsReactive<AuthStore>();
   Size size;
   @override
   Widget build(BuildContext context) {
@@ -62,17 +62,15 @@ final authRM = Injector.getAsReactive<AuthStore>();
                 () => ExtendedNavigator.rootNavigator
                     .pushNamed(Routes.contactUsPage),
               ),
-              Visibility(
-                visible:
-                    Injector.getAsReactive<AuthStore>().state.selectedRole == 1,
-                child: drawerItem(
-                  'عمولة التطبيق',
-                  'money',
-                  () => ExtendedNavigator.rootNavigator
-                      .pushNamed(Routes.commisionPage),
-                ),
-              ),
-              drawerItem('مشاركة التطبيق', 'share', () => Share.share('https://play.google.com/store/apps/details?id=com.skinnyg.mazad')),
+              commissionUp(
+                  Injector.getAsReactive<AuthStore>().state.selectedRole == 1),
+              drawerItem(
+                  'مشاركة التطبيق',
+                  'share',
+                  () => Share.share(
+                      'https://play.google.com/store/apps/details?id=com.skinnyg.mazad')),
+              drawerItem(
+                  'تقييم التطبيق', 'rate', () => AppRate.requestReview()),
               drawerItem(
                   '${authRM.state.selectedRole == 1 ? "الدخول كمزايد" : "الدخول كبائع"}',
                   null, () {
@@ -112,6 +110,24 @@ final authRM = Injector.getAsReactive<AuthStore>();
     );
   }
 
+  Widget commissionUp(bool isSeller) {
+    return isSeller
+        ? drawerItem(
+            'عمولة التطبيق',
+            'money',
+            () => ExtendedNavigator.rootNavigator.pushNamed(
+                Routes.commisionPage,
+                arguments: CommisionPageArguments(isSeller: isSeller)),
+          )
+        : drawerItem(
+            '   تأمين المزايد',
+            'wallet',
+            () => ExtendedNavigator.rootNavigator.pushNamed(
+                Routes.commisionPage,
+                arguments: CommisionPageArguments(isSeller: isSeller)),
+          );
+  }
+
   Widget drawerItem(String title, String iconName, Function callback,
       [bool isExit = false]) {
     return InkWell(
@@ -125,12 +141,19 @@ final authRM = Injector.getAsReactive<AuthStore>();
             SizedBox(
               width: 12,
             ),
-            iconName == null
+            iconName == 'rate'
                 ? Icon(
-                    Icons.sync,
+                    Icons.star_half,
                     color: ColorsD.main,
                   )
-                : Image.asset('assets/icons/$iconName.png'),
+                : iconName == null
+                    ? Icon(
+                        Icons.sync,
+                        color: ColorsD.main,
+                      )
+                    : Image.asset(
+                        'assets/icons/$iconName.png',
+                      ),
             Txt(
               '$title',
               style: TxtStyle()

@@ -7,17 +7,23 @@ import 'package:flutter/material.dart';
 import 'package:mazad/core/api_utils.dart';
 import 'package:mazad/core/utils.dart';
 import 'package:mazad/data/models/auction_model.dart';
+import 'package:mazad/data/models/categories_model.dart';
+import 'package:mazad/data/models/user_home_model.dart';
 import 'package:mazad/presentation/state/auth_store.dart';
+import 'package:mazad/presentation/state/bidder_store.dart';
 import 'package:mazad/presentation/state/seller_store.dart';
 import 'package:mazad/presentation/widgets/waiting_widget.dart';
+import 'package:simple_tooltip/simple_tooltip.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:toast/toast.dart';
 
 class Bidders extends StatefulWidget {
   final id;
+  final scrollController;
   final finishAuctionKey;
 
-  Bidders({Key key, this.id, this.finishAuctionKey}) : super(key: key);
+  Bidders({Key key, this.id, this.finishAuctionKey, this.scrollController})
+      : super(key: key);
 
   @override
   _BiddersState createState() => _BiddersState();
@@ -32,14 +38,15 @@ class _BiddersState extends State<Bidders> {
   }
 
   final sellerRM = Injector.getAsReactive<SellerStore>();
+  AuctionD get currentAuction => sellerRM.state.currentAuction.data.first;
   @override
   void initState() {
-    sellerRM.setState(
-        (state) async => state.getAuctionDetails(widget.id).then((data) {
-              if (data != null) sellerRM.resetToHasData();
-              setState(() {});
-              widget.finishAuctionKey.currentState.setState(() {});
-            }));
+    // sellerRM.setState(
+    //     (state) async => state.getAuctionDetails(widget.id).then((data) {
+    //           if (data != null) sellerRM.resetToHasData();
+    //           setState(() {});
+    //           widget.finishAuctionKey.currentState.setState(() {});
+    //         }));
     super.initState();
   }
 
@@ -56,8 +63,8 @@ class _BiddersState extends State<Bidders> {
       return Center(child: Txt('لا توجد عمليات بعد'));
     else {
       // editableOpList = List.generate(operations.length, (op)=> op.);
-    priceCtrler.text =
-        sellerRM.state.currentAuction?.data?.first?.operations?.first?.price;
+      priceCtrler.text =
+          sellerRM.state.currentAuction?.data?.first?.operations?.first?.price;
       canEditOP =
           operations.first.userId == authRM.state.credentialsModel?.data?.id
               ? canEditOP == true ? true : false
@@ -66,7 +73,8 @@ class _BiddersState extends State<Bidders> {
         padding: EdgeInsets.only(bottom: size.height / 10),
         child: ListView.builder(
           itemCount: operations.length,
-          physics: NeverScrollableScrollPhysics(),
+          controller: widget.scrollController,
+          // physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemBuilder: (context, index) => InkWell(
             onTap: () async =>
@@ -123,67 +131,76 @@ class _BiddersState extends State<Bidders> {
     final profile =
         Injector.getAsReactive<AuthStore>().state.currentBidderProfile;
     return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Parent(
-            child: Image.asset('assets/icons/clear.png'),
-            style: ParentStyle()
-              ..alignmentContent.coordinate(0, 0)
-              ..height(50)
-              ..width(50)
-              ..alignment.topLeft(),
-            gesture: Gestures()
-              ..onTap(() => ExtendedNavigator.rootNavigator.pop()),
-          ),
-          Txt(
-            'تفاصيل المزايد',
-            style: TxtStyle()
-              ..textColor(ColorsD.main)
-              ..fontSize(22),
-          ),
-          Container(
-            height: size.height / 12,
-            width: size.height / 12,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: ColorsD.main),
-                image: DecorationImage(
-                    image: NetworkImage(
-                        '${APIs.imageProfileUrl}${profile.data.image}'),
-                    fit: BoxFit.cover)),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Icon(
-                Icons.person,
-                color: Colors.transparent,
-              ),
-              richText('إسم المستخدم', '${profile.data.name}'),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Icon(Icons.phone),
-              richText('رقم الجوال', '${profile.data.phone}'),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Icon(Icons.location_on),
-              richText('العنوان', '${profile.data.address}'),
-            ],
-          ),
-        ],
+      child: Container(
+        
+        height: size.height/2.6,
+        // color: Colors.red,
+              child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            // Parent(
+            //   child: Image.asset('assets/icons/clear.png'),
+            //   style: ParentStyle()
+            //     ..alignmentContent.coordinate(1, 1)
+            //     ..height(50)
+            //     ..width(50)
+            //     ..alignment.topLeft(),
+            //   gesture: Gestures()
+            //     ..onTap(() => ExtendedNavigator.rootNavigator.pop()),
+            // ),
+            Txt(
+              'تفاصيل المزايد',
+              style: TxtStyle()
+                ..textColor(ColorsD.main)
+                ..fontSize(22),
+            ),
+            Container(
+              height: size.height / 10,
+              width: size.height / 10,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: ColorsD.main),
+                  image: DecorationImage(
+                      image: NetworkImage(
+                          '${APIs.imageProfileUrl}${profile.data.image}'),
+                      fit: BoxFit.cover)),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children:[Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Icon(
+                  Icons.person,
+                  color: Colors.transparent,
+                ),
+                richText('إسم المستخدم', '${profile.data.name}'),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Icon(Icons.phone),
+                richText('رقم الجوال', '${profile.data.phone}'),
+              ],
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Icon(Icons.location_on),
+                richText('العنوان', '${profile.data.address}'),
+              ],
+            ),])
+          ],
+        ),
       ),
     );
   }
@@ -240,7 +257,7 @@ class _BiddersState extends State<Bidders> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             buildEditBtn(index),
@@ -257,8 +274,53 @@ class _BiddersState extends State<Bidders> {
   final authRM = Injector.getAsReactive<AuthStore>();
   bool canEditOP;
   Widget buildEditBtn(int index) {
+    return canEditOP != null && index == 0
+        ? editPriceRebuilder()
+        : hasBalanceWidget(index);
+  }
+
+  Widget hasBalanceWidget(int index) {
+    bool shouldShow = false;
     return Visibility(
-        visible: canEditOP != null && index == 0, child: editPriceRebuilder());
+        visible: !(currentAuction.operations[index].balance.contains('null') ||
+            currentAuction.operations[index].balance == '0'),
+        child: StatefulBuilder(builder: (context, stateSet) {
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 30.0),
+              child: SimpleTooltip(
+                child: InkWell(
+                    onTap: () => stateSet(() => shouldShow = !shouldShow),
+                    child: Image.asset('assets/icons/blackcheck.png',
+                        color: Colors.teal, height: 45, width: 45)),
+                maxHeight: 40,
+                maxWidth: 120,
+                arrowTipDistance: 5,
+                arrowLength: 0,
+                // arrowBaseWidth: ,
+                hideOnTooltipTap: true,
+                tooltipDirection: TooltipDirection.up,
+                backgroundColor: ColorsD.main,
+                borderColor: Colors.white,
+                minimumOutSidePadding: 10,
+                ballonPadding: EdgeInsets.zero,
+                content: Material(
+                  color: ColorsD.main,
+                  child: Txt(
+                      'قيمة التأمين: ${currentAuction.operations[index].balance} ريال',
+                      style: TxtStyle()
+                        ..textDirection(TextDirection.rtl)
+                        ..fontSize(12)
+                        ..textColor(Colors.white)
+                        ..alignment.center()
+                        ..background.color(ColorsD.main)),
+                ),
+
+                show: shouldShow,
+              ),
+            ),
+          );
+        }));
   }
 
   Widget buildCircleAvatar(String image) {
@@ -368,14 +430,37 @@ class _BiddersState extends State<Bidders> {
     );
   }
 
+  final bidderRM = Injector.getAsReactive<BidderStore>();
   editPrice() {
-    final ops = sellerRM.state.currentAuction.data.first.operations;
-    final listPrices = List.generate((ops.length), (index)=>num.parse(ops[index].price))..removeAt(0);
-    final  lastPrice = listPrices.reduce(max);
-    if(lastPrice >= num.parse(priceCtrler.text))
-    return AlertDialogs.failed(context: context, content: 'السعر الذي أدخلته أقل من السعر المتاح');
+    final auctionData = sellerRM.state.currentAuction.data.first;
+    final listPrices = List.generate((auctionData.operations.length),
+        (index) => num.parse(auctionData.operations[index].price))
+      ..removeAt(0);
+    final lastPrice = listPrices.reduce(max);
+    // List<Category> allAqarCats = bidderRM.state.categoriesModel.data
+    //     .where((cat) => cat.name.contains('عقار'))
+    //     .toList();
+    // List<int> aqarCatIDs =
+    //     List.generate((allAqarCats.length), (index) => allAqarCats[index].id);
+    // bool isAqar = aqarCatIDs.contains(
+    //     int.parse(sellerRM.state.currentAuction.data.first.auction.catId));
+    num maxValue = auctionData.auction.maxvalue.contains('null')
+        ? 1000 ^ 10
+        : num.parse(auctionData.auction.maxvalue);
+    num minValue = auctionData.auction.minvalue.contains('null')
+        ? 0
+        : num.parse(auctionData.auction.minvalue);
+    num allowedBid = maxValue + lastPrice;
+    num price = num.parse(priceCtrler.text);
+    if (lastPrice + minValue >= price || price > allowedBid) {
+      AlertDialogs.failed(
+          context: context,
+          content:
+              'السعر الذي أدخلته غير مناسب\nأقل قيمة للزيادة: $minValue\nأكبر قيمة للزيادة: $maxValue');
+      return;
+    }
     canEditOP = false;
-    int opID = ops.first.id;
+    int opID = auctionData.operations.first.id;
     sellerRM.setState((state) => state.editPrice(opID, priceCtrler.text),
         onData: (context, data) {
       sellerRM.setState((state) => state.getAuctionDetails(widget.id));
@@ -384,7 +469,6 @@ class _BiddersState extends State<Bidders> {
   }
 
   editPriceWidget() {
-    
     return Expanded(
       child: canEditOP == true
           ? Column(
@@ -419,19 +503,22 @@ class _BiddersState extends State<Bidders> {
                 ),
               ],
             )
-          : Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                  onPressed: () {
-                    print(canEditOP);
-                    // FocusScope.of(context).requestFocus(editPriceFocusNode);
-                    canEditOP = true;
-                    setState(() {});
-                    Future.delayed(Duration(milliseconds: 10),
-                        () => editPriceFocusNode.requestFocus());
-                    // editPriceFocusNode.requestFocus();
-                  },
-                  icon: Icon(Icons.edit))),
+          : Padding(
+              padding: const EdgeInsets.only(top: 25.0),
+              child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: IconButton(
+                      onPressed: () {
+                        print(canEditOP);
+                        // FocusScope.of(context).requestFocus(editPriceFocusNode);
+                        canEditOP = true;
+                        setState(() {});
+                        Future.delayed(Duration(milliseconds: 10),
+                            () => editPriceFocusNode.requestFocus());
+                        // editPriceFocusNode.requestFocus();
+                      },
+                      icon: Icon(Icons.edit))),
+            ),
     );
   }
 

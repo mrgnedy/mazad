@@ -72,7 +72,7 @@ class _RoleSelectionPageState extends State<RoleSelectionPage>
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          Image.asset('assets/icons/logo.png'),
+                          Image.asset('assets/icons/first.png', height: size.height*0.6,),
                           Txt('بائع',
                               gesture: Gestures()
                                 ..onTap(() {

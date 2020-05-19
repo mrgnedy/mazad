@@ -55,6 +55,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget buildNotificationCard(dynamic notification) {
     return InkWell(
       onTap: () {
+        if(notification is WelcomeMsgs)
+        return;
         if (notification is Commissions)
           ExtendedNavigator.rootNavigator.pushNamed(Routes.commisionPage);
         else if (notification is Finished) {

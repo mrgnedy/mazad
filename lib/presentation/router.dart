@@ -1,6 +1,7 @@
 
 import 'package:auto_route/auto_route_annotations.dart';
 import 'package:mazad/presentation/ui/auctionDetails/auction_details.dart';
+import 'package:mazad/presentation/ui/auctionDetails/seller_details.dart';
 import 'package:mazad/presentation/ui/auth/changePass.dart';
 import 'package:mazad/presentation/ui/auth/forgot_passowrd.dart';
 import 'package:mazad/presentation/ui/auth/rechangepassword.dart';
@@ -34,4 +35,5 @@ class $Router {
   ForgetPassword forgetPassword;
   NotificationScreen notificationScreen;
   RechangePasswordScreen rechangePasswordScreen;
+  SellerDetails sellerDetails;
 }

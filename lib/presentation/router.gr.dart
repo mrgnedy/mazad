@@ -7,9 +7,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:mazad/presentation/ui/auctionDetails/auction_details.dart';
 import 'package:mazad/presentation/ui/role_selection.dart';
 import 'package:mazad/presentation/ui/auth/register.dart';
+import 'package:mazad/presentation/ui/auctionDetails/auction_details.dart';
 import 'package:mazad/data/models/user_home_model.dart';
 import 'package:mazad/presentation/ui/sellerPages/navigationPages/add_auction.dart';
 import 'package:mazad/presentation/ui/mainPage.dart';
@@ -23,6 +23,7 @@ import 'package:mazad/presentation/ui/drawer/about_us.dart';
 import 'package:mazad/presentation/ui/auth/forgot_passowrd.dart';
 import 'package:mazad/presentation/ui/navigationPages/notification_page.dart';
 import 'package:mazad/presentation/ui/auth/rechangepassword.dart';
+import 'package:mazad/presentation/ui/auctionDetails/seller_details.dart';
 
 abstract class Routes {
   static const roleSelectionPage = '/';
@@ -40,6 +41,7 @@ abstract class Routes {
   static const forgetPassword = '/forget-password';
   static const notificationScreen = '/notification-screen';
   static const rechangePasswordScreen = '/rechange-password-screen';
+  static const sellerDetails = '/seller-details';
 }
 
 class Router extends RouterBase {
@@ -112,8 +114,14 @@ class Router extends RouterBase {
           settings: settings,
         );
       case Routes.commisionPage:
+        if (hasInvalidArgs<CommisionPageArguments>(args)) {
+          return misTypedArgsRoute<CommisionPageArguments>(args);
+        }
+        final typedArgs =
+            args as CommisionPageArguments ?? CommisionPageArguments();
         return MaterialPageRoute<dynamic>(
-          builder: (_) => CommisionPage(),
+          builder: (_) =>
+              CommisionPage(key: typedArgs.key, isSeller: typedArgs.isSeller),
           settings: settings,
         );
       case Routes.commisionSuccess:
@@ -164,6 +172,11 @@ class Router extends RouterBase {
           builder: (_) => RechangePasswordScreen(),
           settings: settings,
         );
+      case Routes.sellerDetails:
+        return MaterialPageRoute<dynamic>(
+          builder: (_) => SellerDetails(),
+          settings: settings,
+        );
       default:
         return unknownRoutePage(settings.name);
     }
@@ -201,6 +214,13 @@ class VerifyScreenArguments {
   final String phone;
   final bool isForgetPass;
   VerifyScreenArguments({this.key, this.phone, this.isForgetPass});
+}
+
+//CommisionPage arguments holder class
+class CommisionPageArguments {
+  final Key key;
+  final bool isSeller;
+  CommisionPageArguments({this.key, this.isSeller});
 }
 
 //MapScreen arguments holder class

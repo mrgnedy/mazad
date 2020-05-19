@@ -23,6 +23,9 @@ class AllAuctions {
   List<AuctionData> mobasherdata;
   List<AuctionData> daysdata;
   List<AuctionData> weeksdata;
+  List<AuctionData> allAuctions;
+  List<AuctionData> tempAuctions;
+  int userID;
 
   AllAuctions({this.mobasherdata, this.daysdata, this.weeksdata});
 
@@ -45,13 +48,18 @@ class AllAuctions {
         weeksdata.add(new AuctionData.fromJson(v));
       });
     }
+    tempAuctions = [...mobasherdata, ...daysdata, ...weeksdata];
     mobasherdata = mobasherdata.reversed.toList()
       ..removeWhere((auction) => auction.isFinished);
     daysdata = daysdata.reversed.toList()
       ..removeWhere((auction) => auction.isFinished);
     weeksdata = weeksdata.reversed.toList()
       ..removeWhere((auction) => auction.isFinished);
+
+      allAuctions = [...mobasherdata, ...daysdata, ...weeksdata];
   }
+  
+      List<AuctionData> userAuctions(i) => allAuctions.where((auction)=> auction.userId == i).toList();
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -83,6 +91,8 @@ class AuctionData {
   String deletetime;
   String createdAt;
   String cityName;
+  String maxvalue;
+  String minvalue;
   int cityID;
   String updatedAt;
   List<Images> images;
@@ -104,10 +114,16 @@ class AuctionData {
       this.deletetime,
       this.createdAt,
       this.updatedAt,
-      this.images});
+      this.images,
+      this.maxvalue,
+      this.minvalue
+      });
 
   AuctionData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    minvalue = json['minvalue'].toString();
+    maxvalue = json['maxvalue'].toString();
+
     userId = json['user_id'];
     catId = json['cat_id'].toString();
     desc = json['desc'].toString();

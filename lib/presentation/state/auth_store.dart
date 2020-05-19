@@ -13,6 +13,7 @@ class AuthStore {
   SharedPreferences pref;
   Map<String, dynamic> settingsModel;
   CredentialsModel currentBidderProfile;
+  CredentialsModel currentSellerProfile;
   CredentialsModel credentialsModel;
   NotificationModel notificationModel;
   //userType ==1? Seller : userType ==2? Bidder : null

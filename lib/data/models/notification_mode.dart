@@ -28,6 +28,7 @@ class AllNotifications {
   List<Operations> operations;
   List<Commissions> commissions;
   List<Finishedforuser> finishedforuser;
+  List<WelcomeMsgs> welcomeMessages;
   List<dynamic> allNotifications;
 
   AllNotifications({
@@ -35,6 +36,7 @@ class AllNotifications {
     this.operations,
     this.finishedforuser,
     this.commissions,
+    this.welcomeMessages,
   });
 
   AllNotifications.fromJson(Map<String, dynamic> json) {
@@ -62,13 +64,19 @@ class AllNotifications {
         finishedforuser.add(new Finishedforuser.fromJson(v));
       });
     }
+    if (json['welcomenots'] != null) {
+      welcomeMessages = new List<WelcomeMsgs>();
+      json['welcomenots'].forEach((v) {
+        welcomeMessages.add(new WelcomeMsgs.fromJson(v));
+      });
+    }
     // if (json['times'] != null) {
     //   times = new List<Null>();
     //   json['times'].forEach((v) {
     //     times.add(new Null.fromJson(v));
     //   });
     // }
-    allNotifications = [...finished, ...operations,...finishedforuser];
+    allNotifications = [...finished, ...operations, ...finishedforuser,...welcomeMessages];
     allNotifications.sort((a, b) => DateTime.tryParse(b.createdAt.toString())
         ?.compareTo(DateTime.tryParse(a.createdAt.toString())));
     allNotifications.insertAll(0, commissions);
@@ -136,6 +144,31 @@ class Finished {
       data['auction'] = this.auction.toJson();
     }
     return data;
+  }
+}
+
+class WelcomeMsgs {
+  int id;
+  String title;
+  String body;
+  String createdAt;
+  String updatedAt;
+
+  WelcomeMsgs({
+    this.id,
+    this.title,
+    this.createdAt,
+    this.body,
+    this.updatedAt
+  });
+
+  WelcomeMsgs.fromJson(Map<String, dynamic> json){
+    id = json['id'];
+    title = json['title'];
+    body = json['body'];
+    
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
   }
 }
 
@@ -332,6 +365,6 @@ class Finishedforuser {
     if (this.auction != null) {
       data['auction'] = this.auction.toJson();
     }
-  return data;
+    return data;
   }
 }

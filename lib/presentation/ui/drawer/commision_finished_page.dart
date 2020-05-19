@@ -2,11 +2,14 @@ import 'package:auto_route/auto_route.dart';
 import 'package:division/division.dart';
 import 'package:flutter/material.dart';
 import 'package:mazad/core/utils.dart';
+import 'package:mazad/presentation/state/auth_store.dart';
+import 'package:states_rebuilder/states_rebuilder.dart';
 
 import '../../router.gr.dart';
 
 class CommisionSuccess extends StatelessWidget {
   Size size;
+
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +36,7 @@ class CommisionSuccess extends StatelessWidget {
                 ..onTap(() => ExtendedNavigator.rootNavigator
                     .pushNamedAndRemoveUntil(
                         Routes.mainPage, (Route<dynamic> route) => false,
-                        arguments: MainPageArguments(isSeller: true))),
+                        arguments: MainPageArguments(isSeller: Injector.getAsReactive<AuthStore>().state.selectedRole == 1))),
               style: StylesD.mazadBtnStyle.clone()
                 ..height(size.height / 16)
                 ..width(size.width * 0.5),

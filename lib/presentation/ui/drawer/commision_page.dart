@@ -9,6 +9,7 @@ import 'package:mazad/core/utils.dart';
 import 'package:mazad/data/models/payments_model.dart';
 import 'package:mazad/data/models/settings_model.dart';
 import 'package:mazad/presentation/state/auth_store.dart';
+import 'package:mazad/presentation/state/bidder_store.dart';
 import 'package:mazad/presentation/state/seller_store.dart';
 import 'package:mazad/presentation/widgets/waiting_widget.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
@@ -17,6 +18,9 @@ import '../../router.gr.dart';
 
 class CommisionPage extends StatelessWidget {
   Size size;
+  final bool isSeller;
+
+  CommisionPage({Key key, this.isSeller = true}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +30,7 @@ class CommisionPage extends StatelessWidget {
         appBar: BackAppBar(
             size.height / 10,
             Txt(
-              'دفع العمولة',
+              'دفع ${isSeller ? 'العمولة' : 'التأمين'}',
               style: TxtStyle()
                 ..fontSize(20)
                 ..textColor(ColorsD.main),
@@ -135,14 +139,21 @@ class CommisionPage extends StatelessWidget {
       return null;
       // AlertDialogs.failed(content: 'من فضلك أرفق صورة الايصال', context: context);
     }
-    sellerRM.setState((state) => state.addCommission('1555', _image.path),
-        onError: (context, e) {
-      print(e);
-      return AlertDialogs.failed(content: e.toString(), context: context);
-    }, onData: (_, __) {
-      ExtendedNavigator.rootNavigator
-          .pushReplacementNamed(Routes.commisionSuccess);
-    });
+    if (!isSeller)
+      bidderRM.setState((state) => state.addBalance('0', _image.path),
+          onError: (context, error) {
+        print(error);
+        return AlertDialogs.failed(content: error.toString(), context: context);
+      }, onData: (context, data)=>ExtendedNavigator.rootNavigator.pushReplacementNamed(Routes.commisionSuccess));
+    else
+      sellerRM.setState((state) => state.addCommission('0', _image.path),
+          onError: (context, e) {
+        print(e);
+        return AlertDialogs.failed(content: e.toString(), context: context);
+      }, onData: (_, __) {
+        ExtendedNavigator.rootNavigator
+            .pushReplacementNamed(Routes.commisionSuccess);
+      });
   }
 
   Widget commissionWidget() {
@@ -157,13 +168,14 @@ class CommisionPage extends StatelessWidget {
   }
 
   final sellerRM = Injector.getAsReactive<SellerStore>();
+  final bidderRM = Injector.getAsReactive<BidderStore>();
   Widget sendCommissionRebuilder() {
     return WhenRebuilder(
         onIdle: commissionWidget,
         onWaiting: () => WaitingWidget(),
         onError: (e) => commissionWidget(),
         onData: (d) => commissionWidget(),
-        models: [sellerRM]);
+        models: [isSeller ? sellerRM : bidderRM]);
   }
 
   final authRM = Injector.getAsReactive<AuthStore>();
@@ -196,8 +208,8 @@ class CommisionPage extends StatelessWidget {
   }
 
   Widget commisionsWidget(SettingsInfo commisions) {
-    return Parent(
-      style: StylesD.cartStyle.clone()..margin(top:0, horizontal: 16),
+    return !isSeller? Container(): Parent(
+      style: StylesD.cartStyle.clone()..margin(top: 0, horizontal: 16),
       child: Column(
         children: <Widget>[
           Txt(

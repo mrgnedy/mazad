@@ -19,4 +19,13 @@ class BidderRepo {
     String url = APIs.citiesEP;
     return await APIs.getRequest(url);
   }
+
+  Future addBalance(String price, String imagePath)async{
+    String url = APIs.addbalanceEP;
+    Map<String, String> body=  {
+      'balance' : "$price",
+      'image' : "$imagePath",
+    };
+    return await APIs.postWithFile(url, body, fileName: 'image', filePath: imagePath);
+  }
 }

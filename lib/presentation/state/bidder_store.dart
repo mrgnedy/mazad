@@ -24,4 +24,8 @@ class BidderStore{
     cititesModel = CategoriesModel.fromJson(await bidderRepo.getCities());
     return categoriesModel;
   }
+
+  Future<GeneralModel> addBalance(String price, String imagePath)async{
+    return GeneralModel.fromJson(await bidderRepo.addBalance(price, imagePath));
+  }
 }
