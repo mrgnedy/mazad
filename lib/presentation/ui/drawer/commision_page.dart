@@ -16,11 +16,18 @@ import 'package:states_rebuilder/states_rebuilder.dart';
 
 import '../../router.gr.dart';
 
-class CommisionPage extends StatelessWidget {
-  Size size;
+class CommisionPage extends StatefulWidget {
   final bool isSeller;
+  final String value;
 
-  CommisionPage({Key key, this.isSeller = true}) : super(key: key);
+  CommisionPage({Key key, this.isSeller = true, this.value}) : super(key: key);
+
+  @override
+  _CommisionPageState createState() => _CommisionPageState();
+}
+
+class _CommisionPageState extends State<CommisionPage> {
+  Size size;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +37,7 @@ class CommisionPage extends StatelessWidget {
         appBar: BackAppBar(
             size.height / 10,
             Txt(
-              'دفع ${isSeller ? 'العمولة' : 'التأمين'}',
+              'دفع ${widget.isSeller ? 'العمولة' : 'التأمين'}',
               style: TxtStyle()
                 ..fontSize(20)
                 ..textColor(ColorsD.main),
@@ -63,9 +70,13 @@ class CommisionPage extends StatelessWidget {
   }
 
   File _image;
+
   bool noImageError = false;
+
   Color get color => noImageError ? ColorsD.main : Colors.black;
+
   GlobalKey<State> _getImageKey = GlobalKey<State>();
+
   Widget buildGetPhoto() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20.0),
@@ -139,12 +150,15 @@ class CommisionPage extends StatelessWidget {
       return null;
       // AlertDialogs.failed(content: 'من فضلك أرفق صورة الايصال', context: context);
     }
-    if (!isSeller)
+    if (!widget.isSeller)
       bidderRM.setState((state) => state.addBalance('0', _image.path),
           onError: (context, error) {
-        print(error);
-        return AlertDialogs.failed(content: error.toString(), context: context);
-      }, onData: (context, data)=>ExtendedNavigator.rootNavigator.pushReplacementNamed(Routes.commisionSuccess));
+            print(error);
+            return AlertDialogs.failed(
+                content: error.toString(), context: context);
+          },
+          onData: (context, data) => ExtendedNavigator.rootNavigator
+              .pushReplacementNamed(Routes.commisionSuccess));
     else
       sellerRM.setState((state) => state.addCommission('0', _image.path),
           onError: (context, e) {
@@ -168,23 +182,26 @@ class CommisionPage extends StatelessWidget {
   }
 
   final sellerRM = Injector.getAsReactive<SellerStore>();
+
   final bidderRM = Injector.getAsReactive<BidderStore>();
+
   Widget sendCommissionRebuilder() {
     return WhenRebuilder(
         onIdle: commissionWidget,
         onWaiting: () => WaitingWidget(),
         onError: (e) => commissionWidget(),
         onData: (d) => commissionWidget(),
-        models: [isSeller ? sellerRM : bidderRM]);
+        models: [widget.isSeller ? sellerRM : bidderRM]);
   }
 
   final authRM = Injector.getAsReactive<AuthStore>();
 
   getPaymentInfo() {
-    authRM.setState((state) => state.getPayment().then((s) {
-          if (state.settingsModel == null)
-            authRM.setState((state) => state.getSettings());
-        }));
+    if (authRM.state.paymentsModel == null)
+      authRM.setState((state) => state.getPayment(), onData: (_, state) {});
+    if (authRM.state.settingsModel == null)
+      authRM.setState((state) => state.getSettings());
+    setState(() {});
   }
 
   Widget getPaymentWidget() {
@@ -208,26 +225,35 @@ class CommisionPage extends StatelessWidget {
   }
 
   Widget commisionsWidget(SettingsInfo commisions) {
-    return !isSeller? Container(): Parent(
-      style: StylesD.cartStyle.clone()..margin(top: 0, horizontal: 16),
-      child: Column(
-        children: <Widget>[
-          Txt(
-            'تفاصيل العمولة',
-            style: TxtStyle()
-              ..fontSize(16)
-              ..textColor(ColorsD.main)
-              ..padding(bottom: 10),
-          ),
-          StylesD.richText('عمولة المزادات المباشرة',
-              '${commisions.livecommission}', size.width * 0.5),
-          StylesD.richText('عمولة المزادات اليومية',
-              '${commisions.dailycommission}', size.width * 0.5),
-          StylesD.richText('عمولة المزادات الأسبوعية',
-              '${commisions.weekcommission}', size.width * 0.5),
-        ],
-      ),
-    );
+    return !widget.isSeller
+        ? Container()
+        : Parent(
+            style: StylesD.cartStyle.clone()
+              ..margin(top: 0, horizontal: 16)
+              ..alignmentContent.center(),
+            child: Column(
+              children: <Widget>[
+                Txt(
+                  'تفاصيل العمولة',
+                  style: TxtStyle()
+                    ..fontSize(16)
+                    ..textColor(ColorsD.main)
+                    ..padding(bottom: 10),
+                ),
+                widget.value == null || widget.value.contains('null')
+                    ? Column(children: [
+                        StylesD.richText('عمولة المزادات المباشرة',
+                            '${commisions.livecommission}', size.width * 0.5),
+                        StylesD.richText('عمولة المزادات اليومية',
+                            '${commisions.dailycommission}', size.width * 0.5),
+                        StylesD.richText('عمولة المزادات الأسبوعية',
+                            '${commisions.weekcommission}', size.width * 0.5),
+                      ])
+                    : StylesD.richText('العمولة المطلوب سدادها',
+                        '${widget.value} ريال', size.width * 0.7)
+              ],
+            ),
+          );
   }
 
   Widget contactItem(PaymentInfo bank) {

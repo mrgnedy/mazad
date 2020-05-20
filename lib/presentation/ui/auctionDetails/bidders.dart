@@ -77,8 +77,8 @@ class _BiddersState extends State<Bidders> {
           // physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           itemBuilder: (context, index) => InkWell(
-            onTap: () async =>
-                await bidderDetailsDialog(context, operations[index].userId),
+            onTap: () async => authRM.state.credentialsModel?.data?.id == currentAuction.auction.userId?
+                await bidderDetailsDialog(context, operations[index].userId): {},
             child: bidderCard(operations[index], index),
           ),
         ),
@@ -433,10 +433,11 @@ class _BiddersState extends State<Bidders> {
   final bidderRM = Injector.getAsReactive<BidderStore>();
   editPrice() {
     final auctionData = sellerRM.state.currentAuction.data.first;
+    final initPrice = auctionData.auction.intialPrice == null || auctionData.auction.intialPrice.contains('null') ? 0 : num.parse(auctionData.auction.intialPrice);
     final listPrices = List.generate((auctionData.operations.length),
         (index) => num.parse(auctionData.operations[index].price))
       ..removeAt(0);
-    final lastPrice = listPrices.reduce(max);
+    final lastPrice = listPrices.isEmpty? initPrice: listPrices.reduce(max);
     // List<Category> allAqarCats = bidderRM.state.categoriesModel.data
     //     .where((cat) => cat.name.contains('عقار'))
     //     .toList();
@@ -452,7 +453,14 @@ class _BiddersState extends State<Bidders> {
         : num.parse(auctionData.auction.minvalue);
     num allowedBid = maxValue + lastPrice;
     num price = num.parse(priceCtrler.text);
-    if (lastPrice + minValue >= price || price > allowedBid) {
+    if (initPrice > price && listPrices.isEmpty) {
+      AlertDialogs.failed(
+          context: context,
+          content:
+              'السعر الذي أدخلته غير مناسب\nالسعر الابتدائي: $initPrice');
+      return;
+    }
+    if (lastPrice + minValue > price || price > allowedBid) {
       AlertDialogs.failed(
           context: context,
           content:

@@ -1,4 +1,4 @@
-import 'package:mazad/data/models/user_home_model.dart';
+import 'user_home_model.dart';
 
 class MyAuctionsModel {
   String msg;

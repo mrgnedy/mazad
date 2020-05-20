@@ -52,12 +52,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  Widget buildNotificationCard(dynamic notification) {
+  int loadAt = -1;
+  Widget buildNotificationCard(dynamic notification, int index) {
     return InkWell(
       onTap: () {
-        if(notification is WelcomeMsgs)
-        return;
-        if (notification is Commissions)
+        if (notification is Newcommission) {
+          print('THIS COMMISION VALUE${notification.value}');
+          ExtendedNavigator.rootNavigator.pushNamed(Routes.commisionPage,
+              arguments: CommisionPageArguments(
+                  value: notification.value.toString(), isSeller: true));
+        } else if (notification is WelcomeMsgs)
+          return;
+        else if (notification is Commissions)
           ExtendedNavigator.rootNavigator.pushNamed(Routes.commisionPage);
         else if (notification is Finished) {
           bidderDetailsDialog(context, notification.user);
@@ -70,6 +76,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   AuctionPageArguments(auctionData: notification.auction));
       },
       child: Dismissible(
+        onDismissed:
+            notification is Commissions || notification is Newcommission
+                ? null
+                : (d) {
+                    setState(() => loadAt = index);
+                    deleteNotification(notification.id.toString())
+                        .then((s) => setState(() => loadAt = -1));
+                  },
         key: UniqueKey(),
         child: Container(
           height: size.height / 8,
@@ -101,7 +115,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: ColorsD.main),
                   image: DecorationImage(
-                      image: AssetImage('assets/icons/logo.png'),
+                      image: notification is Operations ||
+                              notification is Finished ||
+                              notification is Finishedforuser
+                          ? NetworkImage(
+                              '${APIs.imageBaseUrl}${notification.auction.images.first.image}')
+                          : AssetImage('assets/icons/logo.png'),
                       fit: BoxFit.cover),
                 ),
               )
@@ -129,8 +148,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
             padding: EdgeInsets.all(12),
             itemCount: notification.length,
             itemExtent: size.height / 8,
-            itemBuilder: (contect, index) =>
-                buildNotificationCard(notification[index]),
+            itemBuilder: (contect, index) => loadAt == index
+                ? WaitingWidget()
+                : buildNotificationCard(notification[index], index),
           );
   }
 
@@ -147,74 +167,79 @@ class _NotificationScreenState extends State<NotificationScreen> {
         models: [authRM]);
   }
 
+  Future deleteNotification(String notID) {
+    return authRM.setState((state) => state.delNotification(notID),
+        onData: (context, data) =>
+            authRM.setState((state) => state.getNotifications()));
+  }
+
   Widget bidderDetailsWidget(User profile) {
     // final profile =
     //     Injector.getAsReactive<AuthStore>().state.currentBidderProfile;
     return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Parent(
-            child: Image.asset('assets/icons/clear.png'),
-            style: ParentStyle()
-              ..alignmentContent.coordinate(0, 0)
-              ..height(50)
-              ..width(50)
-              ..alignment.topLeft(),
-            gesture: Gestures()
-              ..onTap(() => ExtendedNavigator.rootNavigator.pop()),
-          ),
-          Txt(
-            'تفاصيل المزايد',
-            style: TxtStyle()
-              ..textColor(ColorsD.main)
-              ..fontSize(22),
-          ),
-          Container(
-            height: size.height / 12,
-            width: size.height / 12,
-            decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: ColorsD.main),
-                image: DecorationImage(
-                    image:
-                        NetworkImage('${APIs.imageProfileUrl}${profile.image}'),
-                    fit: BoxFit.cover)),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Icon(
-                Icons.person,
-                color: Colors.transparent,
-              ),
-              StylesD.richText(
-                  'إسم المستخدم', '${profile.name}', size.width * 0.6),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Icon(Icons.phone),
-              StylesD.richText(
-                  'رقم الجوال', '${profile.phone}', size.width * 0.6),
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Icon(Icons.location_on),
-              StylesD.richText(
-                  'العنوان', '${profile.address}', size.width * 0.6),
-            ],
-          ),
-        ],
+      child: Container(
+        height: size.height / 2.6,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            Txt(
+              'تفاصيل المزايد',
+              style: TxtStyle()
+                ..textColor(ColorsD.main)
+                ..fontSize(22),
+            ),
+            Container(
+              height: size.height / 10,
+              width: size.height / 10,
+              decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: ColorsD.main),
+                  image: DecorationImage(
+                      image: NetworkImage(
+                          '${APIs.imageProfileUrl}${profile.image}'),
+                      fit: BoxFit.cover)),
+            ),
+            Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Icon(
+                        Icons.person,
+                        color: Colors.transparent,
+                      ),
+                      StylesD.richText(
+                          'إسم المستخدم', '${profile.name}', size.width * 0.6),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Icon(Icons.phone),
+                      StylesD.richText(
+                          'رقم الجوال', '${profile.phone}', size.width * 0.6),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Icon(Icons.location_on),
+                      StylesD.richText(
+                          'العنوان', '${profile.address}', size.width * 0.6),
+                    ],
+                  ),
+                ])
+          ],
+        ),
       ),
     );
   }

@@ -41,5 +41,34 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>io.flutter.embedded_views_preview</key>
+	<string>YES</string>
+	<key>LSApplicationCategoryType</key>
+	<string>Mazad needs this permission</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Mazad needs this permission</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Mazad needs this permission</string>
+	<key>NSCameraUsageDescription</key>
+	<string>يحتاج التطبيق لصلاحية الوصول للكاميرا لإلاتقاط صورة شخصية او صورة للمزاد</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Mazad needs this permission</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>يحتاج التطبيق لصلاحية GPS لتحديد العنوان</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>يحتاج التطبيق لصلاحية GPS لتحديد العنوان</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>يحتاج التطبيق لصلاحية GPS لتحديد العنوان</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Mazad needs this permission</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>يحتاج التطبيق لصلاحية الوصول لمكتبة الصور لادراج صورة شخصية او صورة للمزاد</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Mazad needs this permission</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>

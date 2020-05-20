@@ -5,9 +5,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:division/division.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mazad/core/api_utils.dart';
-import 'package:mazad/presentation/widgets/waiting_widget.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+
+import '../presentation/widgets/waiting_widget.dart';
+import 'api_utils.dart';
 
 class ColorsD {
   static Color main = Color.fromARGB(255, 36, 87, 142);

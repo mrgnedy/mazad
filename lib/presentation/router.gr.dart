@@ -121,7 +121,7 @@ class Router extends RouterBase {
             args as CommisionPageArguments ?? CommisionPageArguments();
         return MaterialPageRoute<dynamic>(
           builder: (_) =>
-              CommisionPage(key: typedArgs.key, isSeller: typedArgs.isSeller),
+              CommisionPage(key: typedArgs.key, isSeller: typedArgs.isSeller, value: typedArgs.value,),
           settings: settings,
         );
       case Routes.commisionSuccess:
@@ -220,7 +220,8 @@ class VerifyScreenArguments {
 class CommisionPageArguments {
   final Key key;
   final bool isSeller;
-  CommisionPageArguments({this.key, this.isSeller});
+  final String value;
+  CommisionPageArguments({this.key, this.isSeller, this.value});
 }
 
 //MapScreen arguments holder class

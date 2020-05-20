@@ -129,6 +129,9 @@ class AuthStore {
     paymentsModel = PaymentsModel.fromJson(await authRepo.getPayment());
     return paymentsModel;
   }
+  Future<GeneralModel> delNotification(String notID) async {
+    return  GeneralModel.fromJson(await authRepo.delNotification(notID));
+  }
 
   Future<String> sendForgetPassword(String phone) async {
     final String verifyNum =

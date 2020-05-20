@@ -29,6 +29,7 @@ class AllNotifications {
   List<Commissions> commissions;
   List<Finishedforuser> finishedforuser;
   List<WelcomeMsgs> welcomeMessages;
+  List<Newcommission> newCommissions;
   List<dynamic> allNotifications;
 
   AllNotifications({
@@ -37,6 +38,7 @@ class AllNotifications {
     this.finishedforuser,
     this.commissions,
     this.welcomeMessages,
+    this.newCommissions,
   });
 
   AllNotifications.fromJson(Map<String, dynamic> json) {
@@ -70,6 +72,13 @@ class AllNotifications {
         welcomeMessages.add(new WelcomeMsgs.fromJson(v));
       });
     }
+    if (json['newcommission'] != null) {
+      newCommissions = new List<Newcommission>();
+      json['newcommission'].forEach((v) {
+        newCommissions.add(new Newcommission.fromJson(v));
+        print('${v['value']}');
+      });
+    }
     // if (json['times'] != null) {
     //   times = new List<Null>();
     //   json['times'].forEach((v) {
@@ -80,6 +89,7 @@ class AllNotifications {
     allNotifications.sort((a, b) => DateTime.tryParse(b.createdAt.toString())
         ?.compareTo(DateTime.tryParse(a.createdAt.toString())));
     allNotifications.insertAll(0, commissions);
+    allNotifications.insertAll(0, newCommissions);
   }
 
   Map<String, dynamic> toJson() {
@@ -365,6 +375,45 @@ class Finishedforuser {
     if (this.auction != null) {
       data['auction'] = this.auction.toJson();
     }
+    return data;
+  }
+  
+}
+
+
+class Newcommission {
+  int id;
+  String title;
+  String body;
+  String value;
+  String createdAt;
+  String updatedAt;
+
+  Newcommission(
+      {this.id,
+      this.title,
+      this.body,
+      this.value,
+      this.createdAt,
+      this.updatedAt});
+
+  Newcommission.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    title = json['title'];
+    body = json['body'];
+    value = json['value'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['title'] = this.title;
+    data['body'] = this.body;
+    data['value'] = this.value;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
     return data;
   }
 }

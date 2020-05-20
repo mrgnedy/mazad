@@ -59,7 +59,7 @@ class AllAuctions {
       allAuctions = [...mobasherdata, ...daysdata, ...weeksdata];
   }
   
-      List<AuctionData> userAuctions(i) => allAuctions.where((auction)=> auction.userId == i).toList();
+      List<AuctionData> userAuctions(i) => tempAuctions.where((auction)=> auction.userId == i).toList();
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();

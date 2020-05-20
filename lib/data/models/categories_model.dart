@@ -43,7 +43,7 @@ class Category {
 
   Category.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    name = json['name'];
+    name = json['name'] == null || json['name'].toString().contains('null')? json['city'] : json['name'];
     city = json['city'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];

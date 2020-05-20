@@ -94,4 +94,11 @@ class AuthRepo {
     String url = APIs.paymentsEP;
     return await APIs.getRequest(url);
   }
+  Future delNotification(String notID) async{
+    String url = APIs.delnotEP;
+    Map<String, dynamic> body = {
+      'not_id' : '$notID'
+    };
+    return await APIs.postRequest(url, body);
+  }
 }

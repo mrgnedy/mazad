@@ -25,6 +25,7 @@ class APIs {
   static String editmazadEP = '${baseUrl}editmazad';
   static String editpriceEP = '${baseUrl}editoperation';
   static String addbalanceEP = '${baseUrl}addbalance';
+  static String delnotEP = '${baseUrl}delnot';
 
   static String loginEP = '${baseUrl}login';
   static String registerEP = '${baseUrl}register';
@@ -46,8 +47,8 @@ class APIs {
     final reactiveModel = Injector.getAsReactive<AuthStore>();
     String _token = reactiveModel.state.credentialsModel?.data?.apiToken;
     _token = _token?? reactiveModel.state.unConfirmedcredentialsModel?.data?.apiToken;
-    // _token= _token??
-    //     'c8GoLrSvefAfqfb2BJ5VXUOUJrSybNAcAd2LeQsNFPGHN60ejuDEV64sSQNblAx75eDpEvz8zFJwe2p6DUkrYjk3LNsimclr6b2v';
+    // _token=
+    //     'OTHHGYD6PFOiPu8EIkiSQc4yCBZ0VCk1PwGfxhOqUXl35wbbXQcxkqP3MysjalV2BY9XlIDhCT6IKGyr6kTQtsnPVcFOVhjE9cbh';
 
     try {
       final response =

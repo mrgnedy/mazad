@@ -201,13 +201,13 @@ class _BidderHomePageState extends State<BidderHomePage>
 
   PreferredSize buildAppBar() {
     return PreferredSize(
-      preferredSize: Size.fromHeight(size.height /10),
+      preferredSize: Size.fromHeight(size.height / 10),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(
             width: size.width * 0.85,
-            padding: EdgeInsets.only(top:10),
+            padding: EdgeInsets.only(top: 10),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -227,37 +227,37 @@ class _BidderHomePageState extends State<BidderHomePage>
     );
   }
 
-  Widget buildCategoryDropDownBtn(List<Category> categoryList) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: DropdownButton(
-          hint: Txt('الكل'),
-          underline: Container(),
-          value: selectedCategory,
-          style: TextStyle(fontFamily: 'bein', color: Colors.grey[700]),
-          items: List.generate(
-            categoryList.length,
-            (index) => DropdownMenuItem(
-              child: Txt(
-                categoryList[index].name,
-                style: TxtStyle()..alignment.center(),
-              ),
-              value: categoryList[index].name,
-            ),
-          ),
-          onChanged: (s) => setState(() {
-                selectedCategory = s;
-                selectedCatID = categoryList
-                    .firstWhere((cat) => cat.name == s, orElse: () => null)
-                    ?.id
-                    .toString();
-              })),
-    );
-  }
+  // Widget buildCategoryDropDownBtn(List<Category> categoryList) {
+  //   return Directionality(
+  //     textDirection: TextDirection.rtl,
+  //     child: DropdownButton(
+  //         hint: Txt('الكل'),
+  //         underline: Container(),
+  //         value: selectedCategory,
+  //         style: TextStyle(fontFamily: 'bein', color: Colors.grey[700]),
+  //         items: List.generate(
+  //           categoryList.length,
+  //           (index) => DropdownMenuItem(
+  //             child: Txt(
+  //               categoryList[index].name,
+  //               style: TxtStyle()..alignment.center(),
+  //             ),
+  //             value: categoryList[index].name,
+  //           ),
+  //         ),
+  //         onChanged: (s) => setState(() {
+  //               selectedCategory = s;
+  //               selectedCatID = categoryList
+  //                   .firstWhere((cat) => cat.name == s, orElse: () => null)
+  //                   ?.id
+  //                   .toString();
+  //             })),
+  //   );
+  // }
 
   getCategories() {
-    if(bidderRM.state.categoriesModel == null)
-    bidderRM.setState((state) => state.getCategories());
+    if (bidderRM.state.categoriesModel == null)
+      bidderRM.setState((state) => state.getCategories());
   }
 
   TextEditingController searchCatCtrler = TextEditingController(text: '');
@@ -268,7 +268,6 @@ class _BidderHomePageState extends State<BidderHomePage>
         animation: animationController,
         builder: (context, child) {
           return Container(
-            
             width: searchBarAnim.value.width,
             height: searchBarAnim.value.height,
             child: Stack(
@@ -282,7 +281,6 @@ class _BidderHomePageState extends State<BidderHomePage>
                   alignment: FractionalOffset(0, 0.15),
                   child: IconButton(
                     onPressed: () => setState(() {
-                      print('s');
                       if (animationController.isCompleted)
                         animationController.reverse();
                       else {
@@ -369,10 +367,9 @@ class _BidderHomePageState extends State<BidderHomePage>
   Widget searchCatWidget() {
     return TypeAheadFormField<Category>(
       suggestionsBoxDecoration: SuggestionsBoxDecoration(
-        constraints: BoxConstraints.tightFor(width: size.width*0.5),
-        hasScrollbar: true,
-        borderRadius: BorderRadius.circular(12)
-      ),
+          constraints: BoxConstraints.tightFor(width: size.width * 0.5),
+          hasScrollbar: true,
+          borderRadius: BorderRadius.circular(12)),
       textFieldConfiguration: TextFieldConfiguration(
         focusNode: searchCatNode,
         controller: searchCatCtrler,
@@ -395,7 +392,7 @@ class _BidderHomePageState extends State<BidderHomePage>
         '${cat.name}',
         style: TxtStyle()
           ..textAlign.center()
-          ..width(size.width*0.5)
+          ..width(size.width * 0.5)
           ..padding(bottom: 5),
       ),
       suggestionsCallback: (suggestion) => Future.sync(
