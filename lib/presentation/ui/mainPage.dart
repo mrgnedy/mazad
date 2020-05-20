@@ -41,6 +41,7 @@ class _MainPageState extends State<MainPage> {
     timer.cancel();
     super.dispose();
   }
+
   @override
   void initState() {
     Injector.getAsReactive<AuthStore>()
@@ -122,10 +123,13 @@ class _MainPageState extends State<MainPage> {
     String timeOfDayStr = timeOfDay.format(context);
     return changeToArabic(timeOfDayStr);
   }
-Timer timer;
+
+  Timer timer;
   Widget timeWidget() {
     return StatefulBuilder(builder: (context, ss) {
-      timer = Timer.periodic(Duration(milliseconds: 999), (s) => ss(() {}));
+      timer = Timer.periodic(Duration(milliseconds: 999), (s) {
+        if (mounted) ss(() {});
+      });
       return Txt(
         '${getTime()}',
         style: TxtStyle()

@@ -19,8 +19,10 @@ import '../../router.gr.dart';
 class CommisionPage extends StatefulWidget {
   final bool isSeller;
   final String value;
+  final int notID;
 
-  CommisionPage({Key key, this.isSeller = true, this.value}) : super(key: key);
+  CommisionPage({Key key, this.isSeller = true, this.value, this.notID})
+      : super(key: key);
 
   @override
   _CommisionPageState createState() => _CommisionPageState();
@@ -165,8 +167,12 @@ class _CommisionPageState extends State<CommisionPage> {
         print(e);
         return AlertDialogs.failed(content: e.toString(), context: context);
       }, onData: (_, __) {
-        ExtendedNavigator.rootNavigator
-            .pushReplacementNamed(Routes.commisionSuccess);
+        if (widget.notID != null) {
+          authRM.setState(
+              (state) => state.delNotification(widget.notID.toString()));
+          ExtendedNavigator.rootNavigator
+              .pushReplacementNamed(Routes.commisionSuccess);
+        }
       });
   }
 
@@ -201,7 +207,8 @@ class _CommisionPageState extends State<CommisionPage> {
       authRM.setState((state) => state.getPayment(), onData: (_, state) {});
     if (authRM.state.settingsModel == null)
       authRM.setState((state) => state.getSettings());
-    setState(() {});
+
+      Future.delayed(Duration(seconds: 1), ()=>setState((){}));
   }
 
   Widget getPaymentWidget() {

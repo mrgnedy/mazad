@@ -60,11 +60,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
           print('THIS COMMISION VALUE${notification.value}');
           ExtendedNavigator.rootNavigator.pushNamed(Routes.commisionPage,
               arguments: CommisionPageArguments(
-                  value: notification.value.toString(), isSeller: true));
+                  value: notification.value.toString(), isSeller: true,notID: notification.id));
         } else if (notification is WelcomeMsgs)
           return;
         else if (notification is Commissions)
-          ExtendedNavigator.rootNavigator.pushNamed(Routes.commisionPage);
+          ExtendedNavigator.rootNavigator.pushNamed(Routes.commisionPage, arguments: CommisionPageArguments(isSeller: true, notID: notification.id));
         else if (notification is Finished) {
           bidderDetailsDialog(context, notification.user);
         } else if (notification.auction == null)
