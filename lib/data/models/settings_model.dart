@@ -35,6 +35,7 @@ class SettingsInfo {
   String livecommission;
   String dailycommission;
   String weekcommission;
+  String image;
   String createdAt;
   String updatedAt;
 
@@ -49,6 +50,7 @@ class SettingsInfo {
       this.secondPhone,
       this.instgram,
       this.twitter,
+      this.image,
       this.facebook,
       this.google,
       this.livecommission,
@@ -70,6 +72,7 @@ class SettingsInfo {
     twitter = json['twitter'];
     facebook = json['facebook'];
     google = json['google'];
+    image = json['image'].toString();
     livecommission = json['livecommission'];
     dailycommission = json['dailycommission'];
     weekcommission = json['weekcommission'];

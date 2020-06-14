@@ -20,10 +20,14 @@ import 'package:mazad/presentation/widgets/waiting_widget.dart';
 import 'package:mazad/rate_app.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+import 'package:slide_countdown_clock/slide_countdown_clock.dart';
+import 'package:circular_countdown/circular_countdown.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:mazad/presentation/router.gr.dart';
 
 import 'bidders.dart';
+import 'clock.dart';
+import 'gallery.dart';
 import 'initPrice_N_city.dart';
 
 GlobalKey _finishAuctionKey = GlobalKey();
@@ -108,14 +112,15 @@ class _AuctionPageState extends State<AuctionPage> {
                     //       auctionData.userId,
                     // ),
                     Divider(),
+                    TimeRemaining(
+                        timeRemaining: remainingTime, isDone: isNegative),
+                    Divider(),
                     InitPriceAndCity(
                       price: widget.auctionData.intialPrice,
                       cityID: widget.auctionData.cityID,
                     ),
                     Divider(),
                     auctionDetails(),
-                    Divider(),
-                    TimeRemaining(timeRemaining: remainingTime),
                     Divider(),
                     Bidders(
                         scrollController: _scrollController,
@@ -256,9 +261,10 @@ class _AuctionPageState extends State<AuctionPage> {
   finishAuctionOnTap() {
     sellerRM.setState(
         (state) => state.finishAuction(widget.auctionData.id.toString()),
-        onData: (_, store) {
+        onData: (ctx, store) {
+          sellerRM.state.getMyAuctions();
       Future.delayed(
-          Duration(seconds: 1), () => AppRate.rateIfAvailable(context));
+          Duration(seconds: 1), () => AppRate.rateIfAvailable(ctx));
 
       store.getMyAuctions().then((_) => ExtendedNavigator.rootNavigator.pop());
     }, onError: (context, e) {
@@ -502,39 +508,6 @@ class _AuctionPageState extends State<AuctionPage> {
   }
 }
 
-class TimeRemaining extends StatefulWidget {
-  final String timeRemaining;
-
-  const TimeRemaining({
-    Key key,
-    this.timeRemaining,
-  }) : super(key: key);
-  @override
-  _TimeRemainingState createState() => _TimeRemainingState();
-}
-
-class _TimeRemainingState extends State<TimeRemaining> {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Image.asset(
-          'assets/icons/timer.png',
-          height: 50,
-          width: 50,
-          fit: BoxFit.cover,
-        ),
-        Txt(
-          widget.timeRemaining,
-          style: TxtStyle()
-            ..textColor(ColorsD.main)
-            ..fontSize(20),
-        )
-      ],
-    );
-  }
-}
 
 Size size;
 
@@ -654,150 +627,3 @@ Size size;
 //   }
 // }
 
-class PhotoGallery extends StatefulWidget {
-  final List<Images> images;
-
-  const PhotoGallery({Key key, this.images}) : super(key: key);
-  @override
-  _PhotoGalleryState createState() => _PhotoGalleryState();
-}
-
-class _PhotoGalleryState extends State<PhotoGallery> {
-  List<String> _imageUrls;
-  List<PhotoViewGalleryPageOptions> imageViewList;
-  int currentIndex = 0;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    _imageUrls = widget.images == null
-        ? []
-        : List.generate(
-            widget.images.length, (index) => widget.images[index].image);
-    _imageUrls = _imageUrls.where((image) => image != null).toList();
-    if (_imageUrls.isEmpty) _imageUrls = List.generate(3, (_) => null);
-    imageViewList = List.generate(_imageUrls.length, (index) {
-      return PhotoViewGalleryPageOptions(
-          imageProvider:
-              NetworkImage('${APIs.imageBaseUrl}${_imageUrls[index]}'),
-          controller: photoViewCtrler);
-    });
-
-    super.initState();
-  }
-
-  PageController imageCtrler;
-  PhotoViewController photoViewCtrler = PhotoViewController();
-
-  @override
-  Widget build(BuildContext context) {
-    imageCtrler = PageController(initialPage: currentIndex);
-    final size = MediaQuery.of(context).size;
-    return Container(
-      width: 1000,
-      // height: 300,
-      child: _imageUrls.isEmpty
-          ? Container()
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                InkWell(
-                    onTap: () =>
-                        // showDialog(
-                        //       context: context,
-                        //       builder: (context) => Dialog(
-                        //         backgroundColor: Colors.black.withOpacity(0.2),
-                        //         child: ,
-                        //       ),
-                        //     ),
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PhotoViewGallery(
-                              pageOptions: imageViewList,
-                              pageController: imageCtrler,
-                            ),
-                          ),
-                        ),
-                    child: buildImage(_imageUrls[currentIndex], false, true)),
-                Container(
-                  // width: 1000,
-                  height: 100,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
-                    children: List.generate(
-                      _imageUrls.length,
-                      (index) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              currentIndex = index;
-                              // imageCtrler.animateToPage(index, duration: Duration(milliseconds: 200), curve: Curves.easeInCubic);
-                              // photoViewCtrler.initial = PhotoViewControllerValue(position: null, scale: null, rotation: null, rotationFocusPoint: null)
-                              // photoViewCtrler.``
-                            });
-                          },
-                          child: buildImage(
-                              _imageUrls[index], currentIndex == index),
-                        );
-                      },
-                    ),
-                  ),
-                )
-              ],
-            ),
-    );
-  }
-
-  Widget buildImage(String imageUrl, bool isSelected,
-      [bool isTitleImage = false]) {
-    final size = MediaQuery.of(context).size;
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          width: isTitleImage ? size.width : size.width / 3.7,
-          color: isSelected ? Colors.amber : Colors.transparent,
-          child: Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                color: ColorsD.main,
-                height: size.height / 4,
-                width: size.width * 0.5,
-                child: imageUrl == null
-                    ? noImageWidget()
-                    : Image.network(
-                        '${APIs.imageBaseUrl}$imageUrl',
-                        fit: BoxFit.cover,
-                      ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget noImageWidget() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Icon(
-            Icons.warning,
-            color: Colors.white,
-          ),
-          Txt('لا توجد صورة',
-              style: TxtStyle()
-                ..textColor(Colors.white)
-                ..textAlign.center())
-        ],
-      ),
-    );
-  }
-}

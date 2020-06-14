@@ -11,7 +11,7 @@ description: A new Flutter project.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.2+3
+version: 1.0.8+7
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -36,7 +36,7 @@ dependencies:
   shared_preferences: any
   toast: any
   # vertical_tabs: any
-  flutter_screenutil: any
+  # flutter_screenutil: any
   flutter_typeahead: any
   # dartz: any
   # google_sign_in: any
@@ -48,15 +48,19 @@ dependencies:
   firebase_messaging: any
   permission_handler: any
   pin_code_fields: any
-  circular_bottom_navigation: any
+  # circular_bottom_navigation: any
   fancy_bottom_navigation: any
   multi_image_picker: any
   animations: any
   photo_view: any
   shimmer: any           #####    
-  rate_my_app: "0.6.1+2" #####
+  # rate_my_app: "0.6.1+2" #####
   app_review: any
   simple_tooltip: any
+  slide_countdown_clock: any
+  circular_countdown: any
+  liquid_progress_indicator: ^0.3.2
+
   # flutter_local_notifications: any
   # vector_math: any
 

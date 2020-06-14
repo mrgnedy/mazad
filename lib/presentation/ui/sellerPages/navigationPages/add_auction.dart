@@ -69,58 +69,59 @@ class NewAuction extends StatelessWidget {
     return StatefulBuilder(
         key: key,
         builder: (context, setState) {
-          return Container(
-            height: size.height / 5,
-            width: size.height / 5,
-            child: Stack(
-              // fit: StackFit.passthrough,
-              children: <Widget>[
-                Parent(
-                  style: ParentStyle()
-                    ..alignmentContent.center()
-                    ..alignment.center(),
-                  child: DottedBorder(
-                    child: Container(
-                        height: size.height / 3,
-                        width: size.height / 3,
-                        child: _images == null
-                            ? Icon(Icons.add)
-                            : ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: AssetThumb(
-                                  asset: _images.first,
-                                  height: size.height ~/ 5,
-                                  width: size.height ~/ 5,
+          return InkWell(
+            onTap: () async {
+              print('pressed $_image');
+              final temp = await StylesD.getMultiPictures(_images);
+              if (temp != null) _images = temp;
+              setState(() {});
+            },
+            child: Container(
+              height: size.height / 5,
+              width: size.height / 5,
+              child: Stack(
+                // fit: StackFit.passthrough,
+                children: <Widget>[
+                  Parent(
+                    style: ParentStyle()
+                      ..alignmentContent.center()
+                      ..alignment.center(),
+                    child: DottedBorder(
+                      child: Container(
+                          height: size.height / 3,
+                          width: size.height / 3,
+                          child: _images == null
+                              ? Icon(Icons.add)
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: AssetThumb(
+                                    asset: _images.first,
+                                    height: size.height ~/ 5,
+                                    width: size.height ~/ 5,
 
-                                  // fit: BoxFit.cover,
-                                ),
-                              )),
-                    borderType: BorderType.RRect,
-                    radius: Radius.circular(12),
+                                    // fit: BoxFit.cover,
+                                  ),
+                                )),
+                      borderType: BorderType.RRect,
+                      radius: Radius.circular(12),
+                    ),
                   ),
-                ),
-                Parent(
-                  child: Icon(
-                    Icons.camera_enhance,
-                    color: ColorsD.main,
-                  ),
-                  gesture: Gestures()
-                    ..onTap(() async {
-                      print('pressed $_image');
-                      final temp = await StylesD.getMultiPictures(_images);
-                      if (temp != null) _images = temp;
-                      setState(() {});
-                    }),
-                  style: ParentStyle()
-                    ..circle()
-                    ..elevation(5, color: ColorsD.elevationColor)
-                    ..background.color(Colors.white)
-                    ..width(40)
-                    ..height(40)
-                    ..alignment.coordinate(0.8, 1.35)
-                    ..alignmentContent.center(),
-                )
-              ],
+                  Parent(
+                    child: Icon(
+                      Icons.camera_enhance,
+                      color: ColorsD.main,
+                    ),
+                    style: ParentStyle()
+                      ..circle()
+                      ..elevation(5, color: ColorsD.elevationColor)
+                      ..background.color(Colors.white)
+                      ..width(40)
+                      ..height(40)
+                      ..alignment.coordinate(0.8, 1.35)
+                      ..alignmentContent.center(),
+                  )
+                ],
+              ),
             ),
           );
         });
@@ -137,50 +138,6 @@ class NewAuction extends StatelessWidget {
   int selectedCatID;
   String selectedCity;
   int selectedCityID;
-  // Widget catDropDownBtn(List<Category> categories) {
-  //   if (categories.isNotEmpty) categories.removeAt(0);
-  //   return CustomBorderedWidget(
-  //     width: size.width * 0.7,
-  //     title: "الفئة",
-  //     dropDownBtn: categories.isEmpty
-  //         ? Container(
-  //             height: size.height / 16,
-  //           )
-  //         : StatefulBuilder(
-  //             builder: (context, setState) {
-  //               return DropdownButton(
-  //                 style: TextStyle(fontFamily: 'bein'),
-  //                 isExpanded: true,
-  //                 underline: Container(),
-  //                 value: selectedCat,
-  //                 hint: Txt(
-  //                   'إختر الفئة',
-  //                   style: TxtStyle()..textAlign.right(),
-  //                 ),
-  //                 items: List.generate(
-  //                   categories.length,
-  //                   (index) => DropdownMenuItem(
-  //                     child: Txt(
-  //                       categories[index].name,
-  //                       style: TxtStyle()
-  //                         ..textAlign.right()
-  //                         ..alignment.center(),
-  //                     ),
-  //                     value: categories[index].name,
-  //                   ),
-  //                 ),
-  //                 onChanged: (s) => setState(() {
-  //                   selectedCat = s;
-  //                   selectedCatID = categories
-  //                       .firstWhere((category) => category.name == s)
-  //                       ?.id;
-  //                   print(selectedCatID);
-  //                 }),
-  //               );
-  //             },
-  //           ),
-  //   );
-  // }
 
   final bidderRM = Injector.getAsReactive<BidderStore>();
   getCategories() {
@@ -313,7 +270,10 @@ class NewAuction extends StatelessWidget {
   startAuction() async {
     print('STARTING AUCTION...');
     if (!_formKey.currentState.validate()) return;
-    if (!canAdd) return;
+    if (!canAdd) {
+    print('CANT START AUCTION');
+      return;
+    }
     canAdd = false;
     // List<Future<ByteData>> futures = [];
     // _images.forEach((img) {
@@ -326,6 +286,7 @@ class NewAuction extends StatelessWidget {
     // });
     // final imageNames = List.generate(_images.length, (i)=>_images[i].name);
     final map = await StylesD.getImageListFromAssets(_images);
+    print('$map');
     sellerRM.setState(
         (state) => state.addAuction(
             AuctionData(
@@ -341,6 +302,8 @@ class NewAuction extends StatelessWidget {
             map.first,
             map.last), onData: (context, data) {
       Toast.show('تم اضافة مزادك بنجاح', context, duration: Toast.LENGTH_LONG);
+      sellerRM.setState((state)=>state.getMyAuctions());
+
       ExtendedNavigator.rootNavigator.pop();
     }, onError: (context, error) {
       canAdd = true;
@@ -351,7 +314,6 @@ class NewAuction extends StatelessWidget {
   }
 
   Widget startAuctionRebuilder(context) {
-    
     return WhenRebuilder(
         onWaiting: () => WaitingWidget(),
         onIdle: () => buildStartAuction(context),

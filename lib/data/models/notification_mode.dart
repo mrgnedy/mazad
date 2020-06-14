@@ -308,15 +308,17 @@ class Commissions {
   int id;
   String title;
   String body;
+  String value;
   String createdAt;
   String updatedAt;
 
-  Commissions({this.id, this.title, this.body, this.createdAt, this.updatedAt});
+  Commissions({this.id, this.title, this.value, this.body, this.createdAt, this.updatedAt});
 
   Commissions.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     title = json['title'];
     body = json['body'];
+    value = json['value'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }

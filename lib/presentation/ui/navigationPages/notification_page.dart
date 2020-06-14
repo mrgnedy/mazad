@@ -56,15 +56,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget buildNotificationCard(dynamic notification, int index) {
     return InkWell(
       onTap: () {
-        if (notification is Newcommission) {
+        if (notification is Newcommission || notification is Commissions) {
           print('THIS COMMISION VALUE${notification.value}');
           ExtendedNavigator.rootNavigator.pushNamed(Routes.commisionPage,
               arguments: CommisionPageArguments(
-                  value: notification.value.toString(), isSeller: true,notID: notification.id));
+                  value: notification.value.toString(),
+                  isSeller: true,
+                  notID: notification.id));
         } else if (notification is WelcomeMsgs)
           return;
-        else if (notification is Commissions)
-          ExtendedNavigator.rootNavigator.pushNamed(Routes.commisionPage, arguments: CommisionPageArguments(isSeller: true, notID: notification.id));
         else if (notification is Finished) {
           bidderDetailsDialog(context, notification.user);
         } else if (notification.auction == null)

@@ -13,9 +13,21 @@ import 'package:states_rebuilder/states_rebuilder.dart';
 
 import '../../../router.gr.dart';
 
-class SellerHomePage extends StatelessWidget {
-  SellerHomePage() {
+class SellerHomePage extends StatefulWidget {
+ 
+
+  @override
+  _SellerHomePageState createState() => _SellerHomePageState();
+}
+
+class _SellerHomePageState extends State<SellerHomePage> {
+  
+  
+@override
+  void initState() {
     sellerRM.setState((state) => state.getMyAuctions());
+    // TODO: implement initState
+    super.initState();
   }
   @override
   // bool isEmpty = true;
@@ -59,6 +71,7 @@ class SellerHomePage extends StatelessWidget {
   }
 
   final sellerRM = Injector.getAsReactive<SellerStore>();
+
   Widget whenAuctionRebuilder() {
     return WhenRebuilder<SellerStore>(
         onIdle: () => sellerRM.state.auctionsModel == null

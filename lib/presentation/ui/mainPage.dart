@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:circular_bottom_navigation/circular_bottom_navigation.dart';
-import 'package:circular_bottom_navigation/tab_item.dart';
 import 'package:division/division.dart';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +39,6 @@ class _MainPageState extends State<MainPage> {
     timer.cancel();
     super.dispose();
   }
-
   @override
   void initState() {
     Injector.getAsReactive<AuthStore>()
@@ -55,6 +52,7 @@ class _MainPageState extends State<MainPage> {
     return SafeArea(
       left: false,
       right: false,
+
       child: Directionality(
         textDirection: TextDirection.rtl,
         child: Scaffold(
@@ -153,10 +151,10 @@ class _MainPageState extends State<MainPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Image.asset('assets/icons/rightcurve.png',
-                    width: size.width * 0.4, fit: BoxFit.fill),
+                    width: size.width * 0.385, fit: BoxFit.fill),
                 Image.asset('assets/icons/logo.png'),
                 Image.asset('assets/icons/leftcurve.png',
-                    width: size.width * 0.4, fit: BoxFit.fill),
+                    width: size.width * 0.39, fit: BoxFit.fill),
               ],
             ),
             Align(

@@ -16,6 +16,7 @@ import 'package:mazad/presentation/widgets/error_widget.dart';
 import 'package:mazad/presentation/widgets/waiting_widget.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
 import 'package:toast/toast.dart';
+import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
 
 class BidderHomePage extends StatefulWidget {
   @override
@@ -165,6 +166,11 @@ class _BidderHomePageState extends State<BidderHomePage>
             ..alignment.center(),
         ),
         Wrap(
+          // shrinkWrap: true,
+          // physics: NeverScrollableScrollPhysics(),
+          // crossAxisCount: 3,
+          // crossAxisSpacing: 10,
+          // addAutomaticKeepAlives: true,
           runSpacing: 10,
           spacing: 10,
           alignment: WrapAlignment.center,
@@ -172,6 +178,56 @@ class _BidderHomePageState extends State<BidderHomePage>
             final image = weeklyAuctions[index].images.isEmpty
                 ? 'null'
                 : weeklyAuctions[index].images.first.image;
+            // return Container();
+            return Container(
+              height: (size.width / 4.1),
+              width: (size.width / 4.1),
+              decoration: BoxDecoration(
+                  border: Border.all(color: ColorsD.main),
+                  borderRadius: BorderRadius.circular(13)),
+              child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: () => ExtendedNavigator.rootNavigator.pushNamed(
+                        Routes.auctionPage,
+                        arguments: AuctionPageArguments(
+                            auctionData: weeklyAuctions[index])),
+                    child: Image.network('${APIs.imageBaseUrl}$image',
+                        cacheHeight: (size.width / 4).round(),
+                        cacheWidth: (size.width / 4).round(),
+                        height: (size.width / 4.1),
+                        width: (size.width / 4.1),
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, chunk) => chunk == null
+                            ? child
+                            : LiquidLinearProgressIndicator(
+                                direction: Axis.vertical,
+                                backgroundColor: Colors.white,
+                                borderColor: ColorsD.main,
+                                center: Container(
+                                  height: size.width / 20,
+                                  width: size.width / 6,
+                                  decoration: BoxDecoration(
+                                      color: ColorsD.main,
+                                      borderRadius: BorderRadius.circular(12)),
+                                  child: Center(
+                                    child: Text(
+                                      '%${((chunk.cumulativeBytesLoaded / chunk.expectedTotalBytes) * 100).roundToDouble()}',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                                borderWidth: 1,
+                                valueColor: AlwaysStoppedAnimation(
+                                  ColorsD.main,
+                                ),
+                                value: ((chunk.cumulativeBytesLoaded /
+                                    chunk.expectedTotalBytes)),
+                              ) //Text('%${((chunk.cumulativeBytesLoaded/chunk.expectedTotalBytes)*100).round()}'),
+
+                        ),
+                  )),
+            );
             return StylesD.imageBuilder(
                 callback: () => ExtendedNavigator.rootNavigator.pushNamed(
                     Routes.auctionPage,

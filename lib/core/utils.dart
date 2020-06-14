@@ -70,11 +70,13 @@ class StylesD {
   static getMultiPictures(List<Asset> images) {
     return MultiImagePicker.pickImages(
         enableCamera: true,
+      
         materialOptions: MaterialOptions(
           startInAllView: true,
         ),
         // selectedAssets: images,
-        maxImages: 10);
+        
+        maxImages: 5);
   }
 
   static Widget imageBuilder(
@@ -97,6 +99,7 @@ class StylesD {
           border: Border.all(color: ColorsD.main, width: 1),
         ),
         child: CachedNetworkImage(
+
           height: height,
           width: width,
           imageUrl: '${APIs.imageBaseUrl}$image',
@@ -135,15 +138,28 @@ class StylesD {
       ),
     );
   }
-
-  static Future<List<dynamic>> getImageListFromAssets(
+ /// Returns two lists, first is the list of images each of which is a list of bytes, second list is the list of image names
+ /// use as follows 
+ /// final list = await getImageListFromAssets(List<Asset> imagesReturnedFrom MultiImagePicker);
+ /// final imageList = list.frist;
+ /// final imageNames = list.last;
+ /// for(int i=0; i<imageList.length; i++) MultiPartFile.fromBytes(fieldName: <Field name, eg: images[$index]>, imageList[index], fileName: imageNames[index])
+   static Future<List<dynamic>> getImageListFromAssets(
       List<Asset> _images) async {
     List<Future<ByteData>> futures = [];
     _images.forEach((img) {
-      futures.add(img.getByteData());
+      print(img.name);
+      try {
+      futures.add(img.getByteData(quality: 60));
+        
+      } catch (e) {
+      print(e);
+      }
     });
-
-    return Future.wait(futures).then((list) {
+  //   _images.add(_images.first);
+  //  futures.add(_images.first.getByteData(quality: 10));
+    return await Future.wait(futures).then((list) {
+      print('waiting...');
       // final list = await Future.wait(futures);
       final imgList = List.generate(list.length, (i) {
         print(list[i].buffer.asUint8List().cast<int>());
@@ -151,7 +167,7 @@ class StylesD {
       });
       final imageNames = List.generate(_images.length, (i) => _images[i].name);
       return [imgList, imageNames];
-    });
+    }, onError: (e)=>print(e));
   }
 
   static getProfilePicture(BuildContext context) async {

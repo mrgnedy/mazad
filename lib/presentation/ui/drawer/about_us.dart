@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:division/division.dart';
 import 'package:flutter/material.dart';
+import 'package:mazad/core/api_utils.dart';
 import 'package:mazad/core/utils.dart';
 
 import 'package:mazad/presentation/state/auth_store.dart';
@@ -44,12 +45,35 @@ class AboutUsPage extends StatelessWidget {
 
   Widget infoWidget() {
     return SingleChildScrollView(
-        child: Txt(
-      '${authRM.state.settingsModel[info]}',
-      style: TxtStyle()
-        ..textAlign.center()
-        ..fontSize(18)
-        ..alignment.center(),
+        child: Column(
+      children: <Widget>[
+       (authRM.state.settingsModel['image'].toString().contains('null')) ? Container(): Card(
+         color: Colors.grey[200],
+         child: Directionality(
+           textDirection: TextDirection.rtl,
+           child: ExpansionTile(
+             
+              initiallyExpanded: false,
+              trailingColor: ColorsD.main.withOpacity(0.2),
+              title: Txt("السجل التجارى", style: TxtStyle()..fontFamily('bein')..textColor(ColorsD.main),),
+              children: <Widget>[
+                Image.asset(
+                  '${APIs.imageBaseUrl}${authRM.state.settingsModel[info]}',
+                  height: size.height * 0.6,
+                ),
+                SizedBox(height: 20,)
+              ],
+            ),
+         ),
+       ),
+        Txt(
+          '${authRM.state.settingsModel[info]}',
+          style: TxtStyle()
+            ..textAlign.center()
+            ..fontSize(18)
+            ..alignment.center(),
+        ),
+      ],
     ));
   }
 

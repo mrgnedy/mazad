@@ -47,9 +47,12 @@ class APIs {
     final reactiveModel = Injector.getAsReactive<AuthStore>();
     String _token = reactiveModel.state.credentialsModel?.data?.apiToken;
     _token = _token?? reactiveModel.state.unConfirmedcredentialsModel?.data?.apiToken;
-    _token=
-        'OTHHGYD6PFOiPu8EIkiSQc4yCBZ0VCk1PwGfxhOqUXl35wbbXQcxkqP3MysjalV2BY9XlIDhCT6IKGyr6kTQtsnPVcFOVhjE9cbh';
-
+    // _token=
+    //     'OTHHGYD6PFOiPu8EIkiSQc4yCBZ0VCk1PwGfxhOqUXl35wbbXQcxkqP3MysjalV2BY9XlIDhCT6IKGyr6kTQtsnPVcFOVhjE9cbh';
+//لا توجد مزادات مباشرة
+//لا توجد مزادات يومية
+//لا توجد مزادات أسبوعية
+//dailyAuction.isEmpty? Center(child:Text('لا توجد مزادات يومية')):
     try {
       final response =
           await http.get(url, headers: {'Authorization': 'Bearer $_token'});
